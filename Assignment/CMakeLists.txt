@@ -62,6 +62,25 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/pickaxe.png
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/pickaxe.png)
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/pickaxenormal.png
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/pickaxenormal.png)
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/boxnormal.png
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/boxnormal.png)
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/ironpatternnormal.png
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/ironpatternnormal.png)
+
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy

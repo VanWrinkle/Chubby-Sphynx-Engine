@@ -1,7 +1,10 @@
 #version 460 core
 
-#define MAX_LIGHTS 60
+// 32 Slot version
+
+#define MAX_LIGHTS 40
 #define MAX_MAT_SLOTS 5
+#define MAX_TEXTURES 32
 
 in      vec3 vs_position;
 in      vec3 vs_fragPos;
@@ -12,6 +15,7 @@ in      vec3 vs_normal;
 in flat vec3 vs_flatNormal;
 in flat  int vs_matID;
 in      vec3 vs_viewDir;
+in      mat3 vs_TBN;
 
 out vec4 finalColor;
 
@@ -27,23 +31,23 @@ struct PointLight{
     float quadratic;
 };
 
-
 struct Material {
     vec3  diffuseCol;
+    int   diffuseTextureIndex;
     vec3  specularCol;
+    int   specularTextureIndex;
+    int   normalTextureIndex;
     float shininess;
 };
 
+uniform int         u_maxtextures;
 
 uniform Material    u_materials[MAX_MAT_SLOTS];
 uniform PointLight  u_lights[MAX_LIGHTS];
 uniform int         u_totalLights = 0;
 uniform bool        u_texturing = false;
 uniform bool        u_lighting = false;
-uniform bool        u_borderMode = false;
-uniform bool        u_masking = false;
 uniform float       u_opaqueness = 1.0;
-uniform vec3        u_borderColor;
 
 
 uniform vec3        u_viewPos;
@@ -51,11 +55,8 @@ uniform vec3        u_ambientLighting;
 uniform vec3        u_blockCol;
 uniform bool        u_blending;
 
-uniform sampler2D   u_whitemask;
+uniform sampler2D   u_textures[MAX_TEXTURES];
 
-uniform sampler2D   u_matDiffuse[5];
-
-uniform sampler2D   u_matSpecular[5];
 
 
 
@@ -65,17 +66,21 @@ vec3 pointLighting( PointLight light, Material material, vec3 normal, vec3 viewD
 
 void main() {
 
-    vec3 viewDir = normalize(vs_viewDir);
-    vec3 normal = normalize(vs_normal);
+
 
     Material material;
     material = u_materials[vs_matID];
-    if(u_masking) {
-        material.diffuseCol = mix(material.diffuseCol, vec3(1.0), texture(u_whitemask, vs_UVcoord).r);
-    }
+    vec3 viewDir = normalize(vs_viewDir);
+    vec3 normal;
+    normal = texture(u_textures[material.normalTextureIndex], vs_UVcoord).rgb;
+    normal = normal*2.0 - 1.0;
+    normal = normalize(vs_TBN*normal);
+
+
+
     if(u_texturing) {
-        material.diffuseCol *= texture(u_matDiffuse[vs_matID], vs_UVcoord).rgb;
-        material.specularCol *= texture(u_matSpecular[vs_matID], vs_UVcoord).rgb;
+        material.diffuseCol *= texture(u_textures[material.diffuseTextureIndex], vs_UVcoord).rgb;
+        material.specularCol *= texture(u_textures[material.specularTextureIndex], vs_UVcoord).rgb;
     }
 
     vec3 ambient = material.diffuseCol * u_ambientLighting;
@@ -87,9 +92,7 @@ void main() {
         lighting += pointLighting(u_lights[i], material, normal, viewDir, vs_fragPos);
     }
 
-    if(u_borderMode) {
-        finalColor = vec4(u_borderColor, 1.0);
-    } else if (u_lighting) {
+    if (u_lighting) {
         finalColor = vec4(lighting, u_opaqueness);
     } else {
         finalColor = vec4(material.diffuseCol, u_opaqueness);

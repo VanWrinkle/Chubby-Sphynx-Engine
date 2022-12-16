@@ -12,6 +12,7 @@
 #include "vertexbuffer.h"
 #include "indexbuffer.h"
 #include "shader.h"
+#include "material.h"
 
 //External
 #include <tiny_obj_loader.h>
@@ -24,17 +25,17 @@
 #include <iostream>
 #include <cassert>
 
-/**
- * Struct for use with the Model class.
- */
-struct Material {
-    std::string diffuseTexture;
-    glm::vec3   diffuseColor {1.0};
-    std::string specularTexture;
-    glm::vec3   specularColor {1.0};
-    float shininess {32};
-    int diffuseTextureSlot {-1};
-    int specularTextureSlot {-1};
+const unsigned NORMAL_FLAT_TEXTURE = 0x7F7FFF;
+const unsigned WHITE_TEXTURE = 0xFFFFFF;
+
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 col;
+    glm::vec2 ts;
+    glm::vec3 norm;
+    glm::vec3 tangent;
+    glm::vec3 bitangent;
+    float mat_ID;
 };
 
 /**
@@ -78,23 +79,25 @@ struct Model : public ModelMatrix {
      * @param shader - target of uniform upload
      */
     void upload(Shader &shader) {
-        int materialSlots = 5;
+        int materialSlots = 15;
         for (int i = 0; i < materials.size() && i < materialSlots; i++) {
-            shader.uploadUniformInt(std::string("u_matDiffuse[" + std::to_string(i) + "]"),
-                                    materials[i].diffuseTextureSlot);
-            shader.uploadUniformInt(std::string("u_matSpecular[" + std::to_string(i) + "]"),
-                                    materials[i].specularTextureSlot);
-            shader.uploadUniformVec3(std::string("u_materials[" + std::to_string(i) + "].diffuseCol"),
-                                     materials[i].diffuseColor);
-            shader.uploadUniformVec3(std::string("u_materials[" + std::to_string(i) + "].specularCol"),
-                                     materials[i].specularColor);
-            shader.uploadUniformFloat(std::string("u_materials[" + std::to_string(i) + "].shininess"),
-                                      materials[i].shininess);
+            shader.uploadUniformInt(std::string("u_textures[" + std::to_string(i*2) + "]"), materials[i].diffuseTextureIndex);
+            shader.uploadUniformInt(std::string("u_textures[" + std::to_string(i*2 + 1) + "]"), materials[i].specularTextureIndex);
+            shader.uploadUniformInt(std::string("u_textures[" + std::to_string(i*2 + 2) + "]"), materials[i].normalTextureIndex);
+            shader.uploadUniformInt(std::string("u_materials[" + std::to_string(i) + "].diffuseTextureIndex"), i*2);
+            shader.uploadUniformInt(std::string("u_materials[" + std::to_string(i) + "].specularTextureIndex"), i*2 + 1);
+            shader.uploadUniformInt(std::string("u_materials[" + std::to_string(i) + "].normalTextureIndex"), i*2 + 2);
+            shader.uploadUniformVec3(std::string("u_materials[" + std::to_string(i) + "].diffuseCol"), materials[i].diffuseColor);
+            shader.uploadUniformVec3(std::string("u_materials[" + std::to_string(i) + "].specularCol"), materials[i].specularColor);
+            shader.uploadUniformFloat(std::string("u_materials[" + std::to_string(i) + "].shininess"), materials[i].shininess);
             shader.uploadUniformMat4("u_modelMatrix", this->getMatrix());
             shader.uploadUniformMat3("u_normalMatrix", this->getNormalMatrix());
         }
     }
 };
+
+
+
 
 
 
@@ -120,6 +123,200 @@ public:
      * @param path
      * @param fileName
      */
+    void loadModelsFromObjWNormals(const std::string &path, const std::string &fileName) {
+
+        if( !m_reader.ParseFromFile(path + fileName, m_readerConfig)) {
+            if( !m_reader.Error().empty()) {
+                std::cout << "[tiny_obj_reader Error]: " << m_reader.Error();
+            }
+        }
+        if(!m_reader.Warning().empty()) {
+            std::cout << "[tiny_obj_reader Error]: " << m_reader.Warning();
+        }
+
+        auto& attrib = m_reader.GetAttrib();
+        auto& shapes = m_reader.GetShapes();
+        auto& materials = m_reader.GetMaterials();
+
+        int vertexCount = 0;
+        int previousVertCount = 0;
+
+        for(const auto & shape : shapes) {
+
+            int duplicates = 0;
+            int largest = 0;
+            for(auto const index : shape.mesh.indices) {
+                if(index.vertex_index > largest) largest = index.vertex_index;
+            }
+            vertexCount = (largest + 1) - vertexCount;
+
+            std::vector<Vertex> vertices;
+            vertices.resize(vertexCount*2);
+
+            std::vector<unsigned> freemap;
+            freemap.resize(vertexCount, 0);
+
+            std::vector<unsigned> indices;
+
+            std::set<int> matIDs;
+
+            unsigned offset = 0;
+
+            //Iterating through faces for one model
+            for(int j = 0; j < shape.mesh.num_face_vertices.size(); j++) {
+                unsigned faceVertices = shape.mesh.num_face_vertices[j];
+                //Iterating through data for one face
+                for(int k = 0; k < faceVertices; k++) {
+                    tinyobj::index_t idx = shape.mesh.indices[offset + k]; // Index of current vertex
+
+                    Vertex v{};
+                    v.mat_ID = -1;
+                    //Position
+                    memcpy(&v.pos, &attrib.vertices[3 * size_t(idx.vertex_index)], sizeof(float)*3);
+                    //Color
+                    memcpy(&v.col, &attrib.colors[3*size_t(idx.vertex_index)], sizeof(float)*3);
+                    //st
+                    if (idx.texcoord_index >= 0) {
+                        v.ts.x = attrib.texcoords[2 * size_t(idx.texcoord_index)];
+                        v.ts.y = 1.0f - attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+                    }
+                    //normal
+                    if (idx.normal_index >= 0) {
+                        memcpy(&v.norm, &attrib.normals[3 * size_t(idx.normal_index)], sizeof(float)*3);
+                    }
+                    // the material ID of the current face placed in provokingq vertex
+                    v.mat_ID = shape.mesh.material_ids[j];
+                    matIDs.insert(v.mat_ID);
+
+
+                    if(!freemap[idx.vertex_index - previousVertCount]) {
+                        vertices[idx.vertex_index - previousVertCount] = v;
+                        indices.push_back(idx.vertex_index - previousVertCount);
+                        freemap[idx.vertex_index - previousVertCount] = 1;
+                    } else if (memcmp(&vertices[idx.vertex_index - previousVertCount], &v, sizeof(Vertex)) != 0) {
+                        bool found = false;
+                        for(int i = vertexCount; i < vertexCount + duplicates; i++) {
+                            if(memcmp(&vertices[i - previousVertCount], &v, sizeof(Vertex)) == 0) {
+                                indices.push_back(i);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) {
+                            vertices[vertexCount + duplicates] = v;
+                            indices.push_back(vertexCount + duplicates++);
+                            if(vertexCount + duplicates >= vertices.size()) {
+                                vertices.resize(vertexCount + duplicates * 2);
+                            }
+                        }
+                    } else {
+                        indices.push_back(idx.vertex_index - previousVertCount);
+                    }
+                }
+                offset += faceVertices;
+            }
+
+            BufferLayout layout({{shaderDataType::Float3, "position"},
+                                 {shaderDataType::Float3, "color"},
+                                 {shaderDataType::Float2, "texcoord"},
+                                 {shaderDataType::Float3, "normal"},
+                                 {shaderDataType::Float3, "tangent"},
+                                 {shaderDataType::Float3, "bitangent"},
+                                 {shaderDataType::Float,  "matID"}});
+
+            std::vector<int> idOffset;
+            for( const auto & id : matIDs) {
+                idOffset.push_back(id);
+            }
+
+            for(int i = 0; i < vertexCount+duplicates; i++) {
+                for(int j = 0; j < idOffset.size(); j++) {
+                    if(idOffset[j] == vertices[i].mat_ID) {
+                        vertices[i].mat_ID = j;
+                        break;
+                    }
+                }
+            }
+            //Iterating over faces after creation of vertices and indices to calculate tangents and bitangents
+
+            for(int i = 0; i < indices.size(); i+=3) {
+                auto &p1 = vertices[indices[i]];
+                auto &p2 = vertices[indices[i+1]];
+                auto &p3 = vertices[indices[i+2]];
+
+                glm::vec3 e1 = p2.pos - p1.pos;
+                glm::vec3 e2 = p3.pos - p1.pos;
+                glm::vec2 dUV1 = p2.ts - p1.ts;
+                glm::vec2 dUV2 = p3.ts - p1.ts;
+                glm::vec3 tangent;
+                glm::vec3 bitangent;
+
+                float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+                tangent.x = f * (dUV2.y * e1.x - dUV1.y * e2.x);
+                tangent.y = f * (dUV2.y * e1.y - dUV1.y * e2.y);
+                tangent.z = f * (dUV2.y * e1.z - dUV1.y * e2.z);
+                tangent = glm::normalize(tangent);
+
+                bitangent.x = f * (-dUV2.x * e1.x + dUV1.x * e2.x);
+                bitangent.y = f * (-dUV2.x * e1.y + dUV1.x * e2.y);
+                bitangent.z = f * (-dUV2.x * e1.z + dUV1.x * e2.z);
+                bitangent = glm::normalize(bitangent);
+
+                p1.tangent = tangent;
+                p2.tangent = tangent;
+                p3.tangent = tangent;
+                p1.bitangent = bitangent;
+                p2.bitangent = bitangent;
+                p3.bitangent = bitangent;
+            }
+
+            for(int i = previousVertCount; i < vertexCount + duplicates; i++) {
+                vertices[i].bitangent = glm::normalize(vertices[i].bitangent);
+                vertices[i].tangent = glm::normalize(vertices[i].tangent);
+               // std::cout << glm::dot(vertices[i].norm, vertices[i].tangent) << " ";
+               // std::cout << glm::dot(vertices[i].norm, vertices[i].bitangent) << " ";
+               // std::cout << glm::dot(vertices[i].tangent, vertices[i].bitangent) << std::endl;
+            }
+
+            auto vao = std::make_shared<VertexArray>();
+            auto vbo = std::make_shared<VertexBuffer>(vertices.data(), (vertexCount + duplicates)*sizeof(Vertex), layout);
+            auto ibo = std::make_shared<IndexBuffer>(indices.data(), indices.size());
+
+            vao->setIndexBuffer(ibo);
+            vao->addVertexBuffer(vbo);
+
+
+            Model model;
+            model.name = shape.name;
+            model.vao = vao;
+
+            for( const auto & id : matIDs ) {
+                auto & material =  materials[id];
+                Material m;
+                m.diffuseColor = {material.diffuse[0], material.diffuse[1], material.diffuse[2]};
+                m.diffuseTexture = material.diffuse_texname;
+                m.specularColor = {material.specular[0], material.specular[1], material.specular[2]};
+                m.specularTexture = material.specular_texname;
+                m.normalTexture = material.normal_texname;
+                m.shininess = material.shininess;
+                model.materials.push_back(m);
+            }
+
+            m_models.insert({model.name, model});
+            previousVertCount = vertexCount;
+        }
+    };
+
+
+
+
+
+
+
+
+
+
+
     void loadModelsFromObj(const std::string &path, const std::string &fileName) {
 
         struct Vertex {
@@ -217,11 +414,13 @@ public:
                 offset += faceVertices;
             }
 
+
             BufferLayout layout({{shaderDataType::Float3, "position"},
                                  {shaderDataType::Float3, "color"},
                                  {shaderDataType::Float2, "texcoord"},
                                  {shaderDataType::Float3, "normal"},
                                  {shaderDataType::Float,  "matID"}});
+
 
             std::vector<int> idOffset;
             for( const auto & id : matIDs) {

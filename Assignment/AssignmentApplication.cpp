@@ -18,10 +18,12 @@
 #include <random>
 
 
+
 const int gridY = 10;
 const int gridX = 5;
 const BufferLayout standardLayout{{shaderDataType::Float3, "position"},    {shaderDataType::Float3, "color"},
-                                  {shaderDataType::Float2, "texturecoord"},{shaderDataType::Float3, "normal"}};
+                                  {shaderDataType::Float2, "texturecoord"},{shaderDataType::Float3, "normal"},
+                                  {shaderDataType::Float3, "tangent"}, {shaderDataType::Float3, "bitangent"}};
 
 const std::vector<glm::vec3> colors {
         {1.0f, 0.0f, 0.0f},
@@ -57,6 +59,25 @@ int Lab4Application::run() {
 
         Input::Keyboard::setKeyBehaviour(Input::Key::SPACE, Input::KeyMode::CONTINUOUS);
         glfwSetKeyCallback(m_window, Input::Keyboard::callback);
+        Input::Key left = Input::Key::A;
+        Input::Key right = Input::Key::D;
+        Input::Key zoomIn = Input::Key::W;
+        Input::Key zoomOut = Input::Key::S;
+        Input::Key up = Input::Key::C;
+        Input::Key forwards = Input::Key::X;
+        Input::Key forwardsFast = Input::Key::SPACE;
+        Input::Key down = Input::Key::L_SHIFT;
+        Input::Key exit = Input::Key::ESCAPE;
+        Input::Key wireframeToggle = Input::Key::T;
+
+
+        Input::Keyboard::setKeyBehaviour(forwardsFast, Input::KeyMode::CONTINUOUS);
+        Input::Keyboard::setKeyBehaviour(up, Input::KeyMode::CONTINUOUS);
+        Input::Keyboard::setKeyBehaviour(down, Input::KeyMode::CONTINUOUS);
+        Input::Keyboard::setKeyBehaviour(zoomIn, Input::KeyMode::CONTINUOUS);
+        Input::Keyboard::setKeyBehaviour(zoomOut, Input::KeyMode::CONTINUOUS);
+        Input::Keyboard::setKeyBehaviour(left, Input::KeyMode::CONTINUOUS);
+        Input::Keyboard::setKeyBehaviour(right, Input::KeyMode::CONTINUOUS);
 
         /**
          * SHADER COMPILATION
@@ -76,12 +97,24 @@ int Lab4Application::run() {
 
         PerspectiveCamera::Frustrum frustrum{};
         frustrum.angle = 70.0f;
-        frustrum.far = 100.0f;
-        frustrum.near = 0.1f;
+        frustrum.far = -1.0f;
+        frustrum.near = 1.0f;
         frustrum.height = windowHeight;
         frustrum.width = windowWidth;
+        float cameraDistance = 70.0f;
+        float cameraHeight = 20.0f;
+        float maxDistance = 85.0f;
+        float minDistance = 2.0f;
+        float zoomRate = 30.0f;
+        float rotation = 0.0f;
+        float rotationRate = 2.0f;
 
-        PerspectiveCamera camera(frustrum, {0.0f, 0.0f, -gridY + 1.45f});
+
+        glm::vec3 cameraPosition(0.0f,
+                                 0.0f,
+                                 -5);
+
+        PerspectiveCamera camera(frustrum, cameraPosition);
 
 
         generalShader.uploadUniformVec3("u_viewPos", camera.GetPosition());
@@ -93,6 +126,7 @@ int Lab4Application::run() {
         borderShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
 
         generalShader.use();
+
 
         /**
          * SETUP OF TEXTURES / MODELS
@@ -126,7 +160,7 @@ int Lab4Application::run() {
         std::string box = "box";
 
         // WALLS
-        modelManager.addModel(floor, {GeoTools::UnitGrid3DVertices<gridX, gridY>(),
+        modelManager.addModel(floor, {GeoTools::UnitGrid3DVerticesNorm<gridX, gridY>(),
                                       GeoTools::UnitGridIndices<gridX, gridY>(),
                                       standardLayout} );
 
@@ -134,8 +168,9 @@ int Lab4Application::run() {
         float tunnelLength = gridY;
         float tunnelHalf = tunnelWidth / 2.0f;
 
+
         modelManager[floor].materials[0] = {"box.png",{0.5,0.6,0.7},
-                                            "box_specular.png", {1.0f, 1.0f, 1.0f}, 64.0f};
+                                            "box_specular.png", {1.0f, 1.0f, 1.0f},"boxnormal.png", 64.0f};
         modelManager[floor].setScale({tunnelWidth, 1.0f, tunnelLength});
         modelManager.addModel(leftWall, modelManager[floor]);
         modelManager.addModel(rightWall, modelManager[floor]);
@@ -148,36 +183,32 @@ int Lab4Application::run() {
         modelManager[roof].setRotation(180.0f, {0.0f, 0.0f, 1.0f});
         modelManager[roof].setPosition({0.0f, tunnelHalf, 0.0f});
 
-        modelManager.addModel(endWall, {GeoTools::UnitGrid3DVertices<gridX, gridX>(),
+        modelManager.addModel(endWall, {GeoTools::UnitGrid3DVerticesNorm<gridX, gridX>(),
                                         GeoTools::UnitGridIndices<gridX, gridX>(),
                                         standardLayout} );
         modelManager[endWall].materials[0] = {"box.png",          {0.5,0.6,0.7},
-                                              "box_specular.png", {1.0f, 1.0f, 1.0f}, 128.0f};
+                                              "box_specular.png", {1.0f, 1.0f, 1.0f},"boxnormal.png", 128.0f};
         modelManager[endWall].setScale({tunnelWidth, 1.0f, tunnelWidth});
         modelManager[endWall].setPosition({0.0f, 0.0f, tunnelLength/2});
         modelManager[endWall].setRotation(-90.0f, {1.0f, 0.0f, 0.0f});
-        modelManager.addModel(box, {GeoTools::UnitCubeVertices,
+        modelManager.addModel(box, {GeoTools::UnitCubeVerticesNorm,
                                     GeoTools::UnitCubeTopology,
                                     standardLayout});
         // Unit cube
 
 
-
         modelManager[box].materials[0] = {"ironpatterndiffuse.png",          {1.0f, 1.0f, 1.0f},
-                                          "ironpatternspecular.png", {1.0f, 1.0f, 1.0f}, 128.0f};
+                                          "ironpatternspecular.png", {1.0f, 1.0f, 1.0f}, "ironpatternnormal.png", 128.0f};
         // Prop pickaxe
-        modelManager.loadModelsFromObj(OBJECTS_DIR, "untitled.obj");
-        modelManager["pickaxe_Cube"].setScale(glm::vec3(0.15));
-        modelManager["pickaxe_Cube"].setPosition({-1.5f, -tunnelHalf+0.015f, -4.0f});
-        modelManager["pickaxe_Cube"].setRotation(90.0f, {0.0f, 0.0f, 1.0f});
-        modelManager["pickaxe_Cube"].rotateGlobal(70.0f, {0.0f, 1.0f, 0.0f});
+        modelManager.loadModelsFromObjWNormals(OBJECTS_DIR, "untitled.obj");
+        modelManager["pickaxe"].setScale(glm::vec3(.3));
+        modelManager["pickaxe"].setRotation(45.0f, {0.0f, 1.0f, 0.0f});
+
 
         // Upload of textures
         for(auto & model : modelManager) {
             textureManager->LoadModelTextures(model.second, TEXTURES_DIR);
         }
-        textureManager->LoadTexture2DRGBA("box_mask", std::string(TEXTURES_DIR) + "box_whitemask.png");
-        generalShader.uploadUniformInt("u_whitemask", textureManager->GetUnitByName("box_mask"));
 
 
         /**
@@ -187,9 +218,11 @@ int Lab4Application::run() {
 
         LightsManager lightsManager("u_lights");
 
+
         std::string light1 = "light1";
         std::string light2 = "light2";
         std::string activeLight = "activeLight";
+
 
         lightsManager.addLight(light1, PointLight());
         lightsManager[light1].isActive = true;
@@ -210,6 +243,7 @@ int Lab4Application::run() {
         /************************************************************************************
         // GAME VARIABLES / RENDER SETUP
         ************************************************************************************/
+
 
         glfwSetTime(0.0);
         float dt = 0;
@@ -276,6 +310,45 @@ int Lab4Application::run() {
                 }
             }
 
+            if(Input::Keyboard::isKeyActive( left )   || Input::Keyboard::isKeyActive( right ) ||
+               Input::Keyboard::isKeyActive( zoomIn ) || Input::Keyboard::isKeyActive( zoomOut ) ||
+               Input::Keyboard::isKeyActive(up) || Input::Keyboard::isKeyActive(down) ) {
+
+                if(Input::Keyboard::isKeyActive( left )) {
+                    rotation += rotationRate * dt;
+                }
+                if(Input::Keyboard::isKeyActive( right )) {
+                    rotation -= rotationRate * dt;
+                }
+                if(Input::Keyboard::isKeyActive( zoomIn )) {
+                    cameraDistance = std::max(minDistance, cameraDistance - zoomRate * dt);
+                }
+                if(Input::Keyboard::isKeyActive( zoomOut )) {
+                    cameraDistance = std::min(maxDistance, cameraDistance + zoomRate * dt);
+                }
+                if(Input::Keyboard::isKeyActive( down )) {
+                    cameraHeight -= zoomRate * dt;
+                }
+                if(Input::Keyboard::isKeyActive( up )) {
+                    cameraHeight += zoomRate * dt;
+                }
+
+
+                cameraPosition.x = cosf(rotation)*cameraDistance;
+                cameraPosition.y = cameraHeight;
+                cameraPosition.z = sinf(rotation)*cameraDistance;
+                camera.SetPosition(cameraPosition);
+
+                generalShader.uploadUniformVec3("u_viewPos", camera.GetPosition());
+                generalShader.uploadUniformMat4("u_view", camera.GetViewMatrix());
+                generalShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
+
+                borderShader.use();
+                borderShader.uploadUniformMat4("u_view", camera.GetViewMatrix());
+                borderShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
+                generalShader.use();
+            }
+
             // Handling directional movement
             if(Input::Keyboard::isKeyActive(Input::Key::LEFT)){
                 gameGrid.move(Direction::RIGHT);
@@ -331,7 +404,7 @@ int Lab4Application::run() {
             modelManager[endWall].upload(generalShader);
             RenderCommands::drawIndex(modelManager[endWall].vao, GL_TRIANGLES);
             // Rendering of lines
-            if(!texturing) {
+ /*          if(!texturing) {
                 borderShader.use();
                 borderShader.uploadUniformVec3("u_borderColor", {0.5f, 1.0f, 0.5f});
                 RenderCommands::disableDepthTest();
@@ -363,10 +436,10 @@ int Lab4Application::run() {
 
                 generalShader.use();
                 RenderCommands::enableDepthTest();
-            }
+            }*/
             // Drawing of pickaxe prop
-            modelManager["pickaxe_Cube"].upload(generalShader);
-            RenderCommands::drawIndex(modelManager["pickaxe_Cube"].vao, GL_TRIANGLES);
+            modelManager["pickaxe"].upload(generalShader);
+            RenderCommands::drawIndex(modelManager["pickaxe"].vao, GL_TRIANGLES);
 
             /************************************************************************************
             // Rendering Stopped Cubes
@@ -385,10 +458,8 @@ int Lab4Application::run() {
                 }
                 modelManager[box].vao->setIndexBuffer(boxTrianglesEBO);
                 generalShader.use();
-                generalShader.uploadUniformInt("u_borderMode", false);
             }
             // Drawing of faces
-            if(texturing) generalShader.uploadUniformInt("u_masking", true);
             for(int i = 0; i < gridY; i++) {
                 for(auto & stoppedPosition : gameGrid.stoppedPositions[i]) {
                     modelManager[box].materials[0].diffuseColor = colors[i];
@@ -397,7 +468,7 @@ int Lab4Application::run() {
                     RenderCommands::drawIndex(modelManager[box].vao, GL_TRIANGLES);
                 }
             }
-            if(texturing) generalShader.uploadUniformInt("u_masking", false);
+
 
             /************************************************************************************
             // Rendering Active Cubes

@@ -37,6 +37,18 @@ namespace RenderCommands {
         glDrawArrays(primitive, 0, vao->getSize());
     }
 
+    inline int getMaxFragmentTextureUnits(){
+        int max;
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max);
+        return max;
+    }
+
+    inline int getMaxTotalTextureUnits(){
+        int max;
+        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max);
+        return max;
+    }
+
     inline void setWireframeMode() {glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 
     inline void setSolidMode() {glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }

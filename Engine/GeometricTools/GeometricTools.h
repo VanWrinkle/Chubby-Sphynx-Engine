@@ -13,7 +13,6 @@
 
 namespace GeoTools {
 
-
     constexpr std::array<float, 3*2> UnitTriangle2D = {-0.5f, -0.5f, 0.5f, -0.5f, 0.0f, 0.5f};
 
     constexpr std::array<float, 4*2> UnitRectangle2D = {-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f};
@@ -62,8 +61,42 @@ namespace GeoTools {
             0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f,  0.0f,1.0f,
             -0.5f, -0.5f, 0.5f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     0.0f,  0.0f,1.0f,
             -0.5f, 0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     0.0f,  0.0f,1.0f,
-
     };
+
+
+    constexpr std::array<float, 24*17> UnitCubeVerticesNorm  = {
+            // y face
+            -0.5f, 0.5f, -0.5f,    1.0f, 1.0f, 1.0f,    0.0f, 0.0f,     0.0f, 1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            0.5f, 0.5f, -0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f, 1.0f, 0.0f,    -1.0f, 0.0f, 0.0f,     0.0f, 0.0f, 1.0f,
+            0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     0.0f, 1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            -0.5f, 0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     0.0f, 1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            //-y face
+            -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,    0.0f, 0.0f,     0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     0.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            /// -x face
+            -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     -1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     -1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+            -0.5f, 0.5f, -0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,     0.0f, -1.0f, 0.0f,      0.0f, 0.0f, 1.0f,
+            /// x face
+            0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,     1.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     1.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     1.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     1.0f, 0.0f, 0.0f,     0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+            // -z face
+            -0.5f, 0.5f, -0.5f,    1.0f, 1.0f, 1.0f,    0.0f, 0.0f,     0.0f,  0.0f,-1.0f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f,  0.0f,-1.0f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     0.0f,  0.0f,-1.0f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f,
+            0.5f, 0.5f, -0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     0.0f,  0.0f,-1.0f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f,
+            /// z face
+            0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,     0.0f, 0.0f, 1.0f,     0.0f, 1.0f, 0.0f,    0.0f, -1.0f, 0.0f,
+            0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f,  0.0f,1.0f,     0.0f, 1.0f, 0.0f,    0.0f, -1.0f, 0.0f,
+            -0.5f, -0.5f, 0.5f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     0.0f,  0.0f,1.0f,     0.0f, 1.0f, 0.0f,    0.0f, -1.0f, 0.0f,
+            -0.5f, 0.5f, 0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f,     0.0f,  0.0f,1.0f,     0.0f, 1.0f, 0.0f,    0.0f, -1.0f, 0.0f,
+    };
+
 
     constexpr std::array<unsigned, 6*6> UnitCubeTopology = {
             1, 0, 2, 0, 3, 2,
@@ -121,6 +154,52 @@ namespace GeoTools {
             }
         }
         std::array<float, X*Y*4*11> ret;
+        memcpy(ret.data(), (float*)vertices, sizeof(vertices));
+        return ret;
+    };
+
+    /**
+     * @tparam X
+     * @tparam Y
+     * @return
+     */
+    template <unsigned int X, unsigned int Y>
+    constexpr std::array<float, X*Y*4* 17> UnitGrid3DVerticesNorm() {
+        struct Vertex{
+            glm::vec3 pos;
+            glm::vec3 col;
+            glm::vec2 st;
+            glm::vec3 nor;
+            glm::vec3 tangent;
+            glm::vec3 bitangent;
+        };
+        Vertex v;
+        Vertex vertices[X*Y*4];
+        float dX = 1.0f / static_cast<float>(X);
+        float dY = 1.0f / static_cast<float>(Y);
+
+
+        for (int i = 0; i < Y; i++) {
+            for (int j = 0; j < X; j++) {
+                v.pos = { -0.5f + dX * j, -0., -0.5f + dY * i};
+                v.col = {1.0f, 1.0f, 1.0f};
+                v.st = {0.0f, 0.0f};
+                v.nor = {0.0f, 1.0f, 0.0f};
+                v.tangent = {-1.0f, 0.0f, 0.0f};
+                v.bitangent = {0.0f, 0.0f, 1.0f};
+                vertices[i*X*4 + (j*4)] = v;
+                v.pos = { -0.5f + dX * j, -0., -0.5f + dY * (i+1)};
+                v.st = {0.0f, 1.0f};
+                vertices[i*X*4 + (j*4)+1] = v;
+                v.pos = { -0.5f + ((j==X-1)? 1.0f : (dX * (j+1))), -0., -0.5f + dY * (i+1)};
+                v.st = {1.0f, 1.0f};
+                vertices[i*X*4 + (j*4)+2] = v;
+                v.pos = { -0.5f + ((j==X-1)? 1.0f : (dX * (j+1))), -0., -0.5f + dY * i};
+                v.st = {1.0f, 0.0f};
+                vertices[i*X*4 + (j*4)+3] = v;
+            }
+        }
+        std::array<float, X*Y*sizeof(Vertex)> ret;
         memcpy(ret.data(), (float*)vertices, sizeof(vertices));
         return ret;
     };

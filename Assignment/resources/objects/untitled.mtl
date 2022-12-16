@@ -12,3 +12,4 @@ d 1.000000
 illum 2
 map_Kd pickaxe.png
 map_Ks pickaxespecular.png
+norm pickaxenormal.png

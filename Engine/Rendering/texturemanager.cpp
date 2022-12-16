@@ -9,20 +9,30 @@ bool TextureManager::LoadModelTextures( Model &model , const std::string &filePa
         if(!material.diffuseTexture.empty()) {
             auto it = m_textures.find(material.diffuseTexture);
             if(it != m_textures.end()) {
-                material.diffuseTextureSlot = it->second.unit;
+                material.diffuseTextureIndex = it->second.unit;
             } else {
                 LoadTexture2DRGBA(material.diffuseTexture, filePath+material.diffuseTexture);
-                material.diffuseTextureSlot = GetUnitByName(material.diffuseTexture);
+                material.diffuseTextureIndex = GetUnitByName(material.diffuseTexture);
             }
         }
 
         if(!material.specularTexture.empty()) {
             auto it = m_textures.find(material.specularTexture);
             if(it != m_textures.end()) {
-                material.specularTextureSlot = it->second.unit;
+                material.specularTextureIndex = it->second.unit;
             } else {
                 LoadTexture2DRGBA(material.specularTexture, filePath+material.specularTexture);
-                material.specularTextureSlot = GetUnitByName(material.specularTexture);
+                material.specularTextureIndex = GetUnitByName(material.specularTexture);
+            }
+        }
+
+        if(!material.normalTexture.empty()) {
+            auto it = m_textures.find(material.normalTexture);
+            if(it != m_textures.end()) {
+                material.normalTextureIndex = it->second.unit;
+            } else {
+                LoadTexture2DRGBA(material.normalTexture, filePath+material.normalTexture);
+                material.normalTextureIndex = GetUnitByName(material.normalTexture);
             }
         }
     }
