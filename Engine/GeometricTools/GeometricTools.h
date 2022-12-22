@@ -185,8 +185,8 @@ namespace GeoTools {
                 v.col = {1.0f, 1.0f, 1.0f};
                 v.st = {0.0f, 0.0f};
                 v.nor = {0.0f, 1.0f, 0.0f};
-                v.tangent = {-1.0f, 0.0f, 0.0f};
-                v.bitangent = {0.0f, 0.0f, 1.0f};
+                v.tangent = { 1.0f, 0.0f, 0.0f};
+                v.bitangent = {0.0f, 0.0f, -1.0f};
                 vertices[i*X*4 + (j*4)] = v;
                 v.pos = { -0.5f + dX * j, -0., -0.5f + dY * (i+1)};
                 v.st = {0.0f, 1.0f};

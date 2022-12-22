@@ -15,7 +15,7 @@ class OrthographicCamera : public Camera
 {
 public:
 
-    struct Frustrum {
+    struct Frustum {
         float left;
         float right;
         float bottom;
@@ -25,43 +25,45 @@ public:
     };
 
 public:
-    explicit OrthographicCamera(const Frustrum& frustrum={-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f},
+    explicit OrthographicCamera(const Frustum& frustum={-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f},
                        const glm::vec3& position=glm::vec3(0.0f), float rotation=0.0f) {
-        Position = position;
-        Rotation = rotation;
-        ProjectionMatrix = glm::ortho(frustrum.left, frustrum.right, frustrum.bottom,
-                                      frustrum.top, frustrum.near, frustrum.far);
-        ViewMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-        ViewMatrix = glm::translate(ViewMatrix, position);
-        ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+        m_position = position;
+        m_rotation = rotation;
+        m_projectionMatrix = glm::ortho(frustum.left, frustum.right, frustum.bottom,
+                                        frustum.top, frustum.near, frustum.far);
+        m_viewMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+        m_viewMatrix = glm::translate(m_viewMatrix, position);
+        m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
     };
     ~OrthographicCamera()=default;
 
     OrthographicCamera(const OrthographicCamera& camera) : Camera(camera) {
-        this->Rotation = camera.Rotation;
-        this->CameraFrustrum = camera.CameraFrustrum;
+        this->m_rotation = camera.m_rotation;
+        this->m_cameraFrustum = camera.m_cameraFrustum;
     }
 
     void SetRotation(float rotation) {
-        this->Rotation = rotation; this->RecalculateMatrix();
+        this->m_rotation = rotation;
+        this->recalculateMatrix();
     }
 
-    void SetFrustrum(const Frustrum& frustrum) {
-        this->CameraFrustrum =frustrum; this->RecalculateMatrix();
+    void SetFrustrum(const Frustum& frustrum) {
+        this->m_cameraFrustum =frustrum;
+        this->recalculateMatrix();
     }
 
 protected:
-    void RecalculateMatrix() override {
-        ProjectionMatrix = glm::ortho(CameraFrustrum.left, CameraFrustrum.right, CameraFrustrum.bottom,
-                                      CameraFrustrum.top, CameraFrustrum.near, CameraFrustrum.far);
-        ViewMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-        ViewMatrix = glm::translate(ViewMatrix, Position);
-        ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+    void recalculateMatrix() override {
+        m_projectionMatrix = glm::ortho(m_cameraFrustum.left, m_cameraFrustum.right, m_cameraFrustum.bottom,
+                                        m_cameraFrustum.top, m_cameraFrustum.near, m_cameraFrustum.far);
+        m_viewMatrix *= glm::rotate(glm::mat4(1.0f), glm::radians(m_rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+        m_viewMatrix = glm::translate(m_viewMatrix, m_position);
+        m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
     };
 
 protected:
-    float Rotation; // in degrees around the Z axis
-    Frustrum CameraFrustrum{};
+    float m_rotation; // in degrees around the Z axis
+    Frustum m_cameraFrustum{};
 };
 
 #endif // ORTHOGRAPHICCAMERA_H_

@@ -70,9 +70,10 @@ int Lab4Application::run() {
         Input::Key exit = Input::Key::ESCAPE;
         Input::Key wireframeToggle = Input::Key::T;
 
+        Input::Mouse mouse(m_window);
+
 
         Input::Keyboard::setKeyBehaviour(forwardsFast, Input::KeyMode::CONTINUOUS);
-        Input::Keyboard::setKeyBehaviour(up, Input::KeyMode::CONTINUOUS);
         Input::Keyboard::setKeyBehaviour(down, Input::KeyMode::CONTINUOUS);
         Input::Keyboard::setKeyBehaviour(zoomIn, Input::KeyMode::CONTINUOUS);
         Input::Keyboard::setKeyBehaviour(zoomOut, Input::KeyMode::CONTINUOUS);
@@ -95,10 +96,10 @@ int Lab4Application::run() {
         int windowHeight;
         glfwGetWindowSize(m_window, &windowWidth, &windowHeight);
 
-        PerspectiveCamera::Frustrum frustrum{};
+        PerspectiveCamera::Frustum frustrum{};
         frustrum.angle = 70.0f;
-        frustrum.far = -1.0f;
-        frustrum.near = 1.0f;
+        frustrum.far = 100.0f;
+        frustrum.near = 0.01f;
         frustrum.height = windowHeight;
         frustrum.width = windowWidth;
         float cameraDistance = 70.0f;
@@ -110,6 +111,10 @@ int Lab4Application::run() {
         float rotationRate = 2.0f;
 
 
+
+
+
+
         glm::vec3 cameraPosition(0.0f,
                                  0.0f,
                                  -5);
@@ -117,13 +122,13 @@ int Lab4Application::run() {
         PerspectiveCamera camera(frustrum, cameraPosition);
 
 
-        generalShader.uploadUniformVec3("u_viewPos", camera.GetPosition());
-        generalShader.uploadUniformMat4("u_view", camera.GetViewMatrix());
-        generalShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
+        generalShader.uploadUniformVec3("u_viewPos", camera.getPosition());
+        generalShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+        generalShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
 
         borderShader.use();
-        borderShader.uploadUniformMat4("u_view", camera.GetViewMatrix());
-        borderShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
+        borderShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+        borderShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
 
         generalShader.use();
 
@@ -204,6 +209,8 @@ int Lab4Application::run() {
         modelManager["pickaxe"].setScale(glm::vec3(.3));
         modelManager["pickaxe"].setRotation(45.0f, {0.0f, 1.0f, 0.0f});
 
+        modelManager["Cube"].setPosition({3.0f, 0.0f, 3.0f});
+
 
         // Upload of textures
         for(auto & model : modelManager) {
@@ -230,13 +237,18 @@ int Lab4Application::run() {
         lightsManager[light1].specular = glm::vec3(.5f, 0.8f, 0.8f);
 
         lightsManager.addLight(light2, PointLight());
+        lightsManager[light2].isActive = true;
         lightsManager[light2].diffuse = {1.f, 0.5, 0.5};
         lightsManager[light2].specular = {1.f, 0.5, 0.5};
 
         lightsManager.addLight(activeLight, PointLight());
+        lightsManager[activeLight].isActive = true;
         lightsManager[activeLight].setAttenuationByDistance(3);
         lightsManager[activeLight].diffuse = {1.f, .5, 0.0};
         lightsManager[activeLight].specular = {1.f, .5, 0.0};
+
+        lightsManager.addLight("cameraLight", PointLight());
+        lightsManager["cameraLight"].position = {0.0f, -100.0f, 0.0f};
 
         lightsManager.upload(generalShader);
 
@@ -256,6 +268,8 @@ int Lab4Application::run() {
         float secondaryTimerMax = 0.01;
         bool texturing = false;
         bool lighting = false;
+        bool flyCam = false;
+        bool camLight = false;
 
         GameGrid<gridX, gridY> gameGrid({gridX, gridX, gridY});
         glm::vec3 lightPosition(0);
@@ -276,12 +290,14 @@ int Lab4Application::run() {
         // GAME LOOP
         ************************************************************************************/
 
+
         while(!glfwWindowShouldClose(m_window)) {
 
             // Updating time
             previousFrame = currentFrame;
             currentFrame = glfwGetTime();
             dt = currentFrame - previousFrame;
+            mouse.update(dt);
 
             /**
              * CONTROLLER INPUT/UPDATES
@@ -296,7 +312,7 @@ int Lab4Application::run() {
                 gameGrid.moveForward();
                 movementTimer = timerMax;
                 secondaryTimer = secondaryTimerMax;
-            } else if (Input::Keyboard::isKeyActive(Input::Key::SPACE) && !dropping) {
+            } else if (Input::Keyboard::isKeyActive(Input::Key::J) && !dropping) {
                 dropping = true;
             }
             if(dropping) {
@@ -310,10 +326,34 @@ int Lab4Application::run() {
                 }
             }
 
-            if(Input::Keyboard::isKeyActive( left )   || Input::Keyboard::isKeyActive( right ) ||
-               Input::Keyboard::isKeyActive( zoomIn ) || Input::Keyboard::isKeyActive( zoomOut ) ||
-               Input::Keyboard::isKeyActive(up) || Input::Keyboard::isKeyActive(down) ) {
+            if(Input::Keyboard::isKeyActive(Input::Key::C)) {
+                flyCam = !flyCam;
+                if(flyCam) {
+                    mouse.captureMouse();
+                    mouse.resetDelta();
+                } else {
+                    camera.SetLookAt({0.0f, 0.0f, 0.0f});
+                    mouse.releaseMouse();
+                }
+            }
 
+            if(Input::Keyboard::isKeyActive(Input::Key::K)) {
+                camLight = !camLight;
+                if(camLight) {
+                    lightsManager["cameraLight"].isActive = true;
+                } else {
+                    lightsManager["cameraLight"].isActive = false;
+                    lightsManager.upload(generalShader, "cameraLight",0);
+                }
+            }
+            if(camLight) {
+                lightsManager["cameraLight"].position = camera.getPosition();
+                lightsManager.upload(generalShader, "cameraLight", POS);
+            }
+
+
+
+            if( !flyCam ) {
                 if(Input::Keyboard::isKeyActive( left )) {
                     rotation += rotationRate * dt;
                 }
@@ -329,25 +369,58 @@ int Lab4Application::run() {
                 if(Input::Keyboard::isKeyActive( down )) {
                     cameraHeight -= zoomRate * dt;
                 }
-                if(Input::Keyboard::isKeyActive( up )) {
+                if(Input::Keyboard::isKeyActive( Input::Key::SPACE )) {
                     cameraHeight += zoomRate * dt;
                 }
-
 
                 cameraPosition.x = cosf(rotation)*cameraDistance;
                 cameraPosition.y = cameraHeight;
                 cameraPosition.z = sinf(rotation)*cameraDistance;
-                camera.SetPosition(cameraPosition);
+                camera.setPosition(cameraPosition);
 
-                generalShader.uploadUniformVec3("u_viewPos", camera.GetPosition());
-                generalShader.uploadUniformMat4("u_view", camera.GetViewMatrix());
-                generalShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
+                generalShader.uploadUniformVec3("u_viewPos", camera.getPosition());
+                generalShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+                generalShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
 
                 borderShader.use();
-                borderShader.uploadUniformMat4("u_view", camera.GetViewMatrix());
-                borderShader.uploadUniformMat4("u_projection", camera.GetProjectionMatrix());
+                borderShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+                borderShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
+                generalShader.use();
+            } else {
+                camera.mouseInput(mouse.getMouseDelta()*0.05f);
+                glm::vec3 direction {};
+                if(Input::Keyboard::isKeyActive(Input::Key::A)) {
+                    direction +=  glm::vec3(-1.0f, 0.0f, 0.0f);
+                }
+                if(Input::Keyboard::isKeyActive(Input::Key::D)) {
+                    direction +=  glm::vec3(1.0f, 0.0f, 0.0f);
+                }
+                if(Input::Keyboard::isKeyActive(Input::Key::W)) {
+                    direction +=  glm::vec3(0.0f, 0.0f, 1.0f);
+                }
+                if(Input::Keyboard::isKeyActive(Input::Key::S)) {
+                    direction +=  glm::vec3(0.0f, 0.0f, -1.0f);
+                }
+                if(Input::Keyboard::isKeyActive(Input::Key::L_SHIFT)) {
+                    direction +=  glm::vec3(0.0f, -1.0f, 0.0f);
+                }
+                if(Input::Keyboard::isKeyActive(Input::Key::SPACE)) {
+                    direction +=  glm::vec3(0.0f, 1.0f, 0.0f);
+                }
+                if(direction.x || direction.y || direction.z) {
+                    camera.move(direction, dt*10.f);
+                }
+
+                generalShader.uploadUniformVec3("u_viewPos", camera.getPosition());
+                generalShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+                generalShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
+
+                borderShader.use();
+                borderShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+                borderShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
                 generalShader.use();
             }
+
 
             // Handling directional movement
             if(Input::Keyboard::isKeyActive(Input::Key::LEFT)){
@@ -379,7 +452,7 @@ int Lab4Application::run() {
             // Lighting updates/movement
             ************************************************************************************/
 
-            lightsManager[light1].position = {sin(currentFrame), cos(currentFrame), 0.0f};
+            lightsManager[light1].position = {sin(currentFrame), cos(currentFrame), cos(currentFrame)*4};
             lightsManager.upload(generalShader, light1, POS);
             lightsManager[light2].position = {cos(currentFrame + 1), sin(currentFrame + 1), 4.0f};
             lightsManager.upload(generalShader, light2, POS);
@@ -403,43 +476,12 @@ int Lab4Application::run() {
             RenderCommands::drawIndex(modelManager[floor].vao, GL_TRIANGLES);
             modelManager[endWall].upload(generalShader);
             RenderCommands::drawIndex(modelManager[endWall].vao, GL_TRIANGLES);
-            // Rendering of lines
- /*          if(!texturing) {
-                borderShader.use();
-                borderShader.uploadUniformVec3("u_borderColor", {0.5f, 1.0f, 0.5f});
-                RenderCommands::disableDepthTest();
-
-                modelManager[roof].vao->setIndexBuffer(wallLinesEBO);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[roof].getMatrix());
-                RenderCommands::drawIndex(modelManager[roof].vao, GL_LINES);
-                modelManager[roof].vao->setIndexBuffer(wallTrianglesEBO);
-
-                modelManager[leftWall].vao->setIndexBuffer(wallLinesEBO);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[leftWall].getMatrix());
-                RenderCommands::drawIndex(modelManager[leftWall].vao, GL_LINES);
-                modelManager[leftWall].vao->setIndexBuffer(wallTrianglesEBO);
-
-                modelManager[rightWall].vao->setIndexBuffer(wallLinesEBO);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[rightWall].getMatrix());
-                RenderCommands::drawIndex(modelManager[rightWall].vao, GL_LINES);
-                modelManager[rightWall].vao->setIndexBuffer(wallTrianglesEBO);
-
-                modelManager[floor].vao->setIndexBuffer(wallLinesEBO);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[floor].getMatrix());
-                RenderCommands::drawIndex(modelManager[floor].vao, GL_LINES);
-                modelManager[floor].vao->setIndexBuffer(wallTrianglesEBO);
-
-                modelManager[endWall].vao->setIndexBuffer(wallLinesEBO);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[endWall].getMatrix());
-                RenderCommands::drawIndex(modelManager[endWall].vao, GL_LINES);
-                modelManager[endWall].vao->setIndexBuffer(wallTrianglesEBO);
-
-                generalShader.use();
-                RenderCommands::enableDepthTest();
-            }*/
-            // Drawing of pickaxe prop
             modelManager["pickaxe"].upload(generalShader);
             RenderCommands::drawIndex(modelManager["pickaxe"].vao, GL_TRIANGLES);
+            modelManager["Cube"].upload(generalShader);
+            RenderCommands::drawIndex(modelManager["Cube"].vao, GL_TRIANGLES);
+
+
 
             /************************************************************************************
             // Rendering Stopped Cubes

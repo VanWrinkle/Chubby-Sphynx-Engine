@@ -16,43 +16,45 @@ public:
     ~Camera()=default;
 
     // Get camera matrices
-    [[nodiscard]] const glm::mat4& GetProjectionMatrix() const {
-        return this->ProjectionMatrix;
+    [[nodiscard]] const glm::mat4& getProjectionMatrix() const {
+        return this->m_projectionMatrix;
     }
 
-    [[nodiscard]] const glm::mat4& GetViewMatrix() const {
-        return this->ViewMatrix; }
+    [[nodiscard]] const glm::mat4& getViewMatrix() const {
+        return this->m_viewMatrix; }
 
     [[nodiscard]] const glm::mat4& GetViewProjectionMatrix() const {
-        return this->ViewProjectionMatrix;
+        return this->m_viewProjectionMatrix;
     }
 
     // Set/Get position
-    [[nodiscard]] const glm::vec3& GetPosition() const {
-        return this->Position;
+    [[nodiscard]] const glm::vec3& getPosition() const {
+        return this->m_position;
     }
 
-    void SetPosition(const glm::vec3& pos) {
-        this->Position = pos; this->RecalculateMatrix();
+    virtual void setPosition(const glm::vec3& pos) {
+        this->m_position = pos;
+        this->recalculateMatrix();
     }
 
 protected:
-    virtual void RecalculateMatrix() = 0;
+    virtual void recalculateMatrix() = 0;
 
 protected:
     Camera(const Camera& camera)
     {
-        this->ProjectionMatrix = camera.ProjectionMatrix;
-        this->ViewMatrix = camera.ViewMatrix;
-        this->Position = camera.Position;
-        this->ViewProjectionMatrix = camera.ViewProjectionMatrix;
+        this->m_projectionMatrix = camera.m_projectionMatrix;
+        this->m_viewMatrix = camera.m_viewMatrix;
+        this->m_position = camera.m_position;
+        this->m_viewProjectionMatrix = camera.m_viewProjectionMatrix;
     }
 
 protected:
-    glm::mat4 ProjectionMatrix = glm::mat4(1.0f);
-    glm::mat4 ViewMatrix = glm::mat4(1.0f);
-    glm::mat4 ViewProjectionMatrix = glm::mat4(1.0f);
-    glm::vec3 Position = glm::vec3(0.0f);
+    glm::vec3 m_orientation;
+    glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
+    glm::mat4 m_viewMatrix = glm::mat4(1.0f);
+    glm::mat4 m_viewProjectionMatrix = glm::mat4(1.0f);
+    glm::vec3 m_position = glm::vec3(0.0f);
 };
 
 #endif // CAMERA_H_

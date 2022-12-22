@@ -75,6 +75,7 @@ void main() {
     normal = texture(u_textures[material.normalTextureIndex], vs_UVcoord).rgb;
     normal = normal*2.0 - 1.0;
     normal = normalize(vs_TBN*normal);
+    //normal.y*=-1;
 
 
 

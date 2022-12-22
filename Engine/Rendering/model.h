@@ -265,9 +265,9 @@ public:
                 p1.tangent = tangent;
                 p2.tangent = tangent;
                 p3.tangent = tangent;
-                p1.bitangent = bitangent;
-                p2.bitangent = bitangent;
-                p3.bitangent = bitangent;
+                p1.bitangent = -bitangent;
+                p2.bitangent = -bitangent;
+                p3.bitangent = -bitangent;
             }
 
             for(int i = previousVertCount; i < vertexCount + duplicates; i++) {

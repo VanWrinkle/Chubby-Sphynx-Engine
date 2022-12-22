@@ -36,6 +36,12 @@ namespace Input {
             }
         }
 
+        void resetDelta() {
+            glfwGetCursorPos(m_window, &m_posX, &m_posY);
+            m_prevX = m_posX;
+            m_prevY = m_posY;
+        }
+
         void enableSmoothing(float factor = 1.0f, const float &minStep = 0.0f) {
             m_factor = factor;// std::min(std::max(factor, 0.0f), 1.0f);
             m_smoothing = true;
@@ -51,6 +57,14 @@ namespace Input {
 
         [[nodiscard]] glm::vec2 getMouseDelta() const {
             return {m_posX - m_prevX, m_posY - m_prevY};
+        }
+
+        void captureMouse() {
+            glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
+        void releaseMouse() {
+            glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
 
