@@ -196,7 +196,7 @@ public:
                     } else if (memcmp(&vertices[idx.vertex_index - previousVertCount], &v, sizeof(Vertex)) != 0) {
                         bool found = false;
                         for(int i = vertexCount; i < vertexCount + duplicates; i++) {
-                            if(memcmp(&vertices[i - previousVertCount], &v, sizeof(Vertex)) == 0) {
+                            if(memcmp(&vertices[i], &v, sizeof(Vertex)) == 0) {
                                 indices.push_back(i);
                                 found = true;
                                 break;
