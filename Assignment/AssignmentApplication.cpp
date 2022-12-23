@@ -19,6 +19,7 @@
 
 
 
+
 const int gridY = 10;
 const int gridX = 5;
 const BufferLayout standardLayout{{shaderDataType::Float3, "position"},    {shaderDataType::Float3, "color"},
