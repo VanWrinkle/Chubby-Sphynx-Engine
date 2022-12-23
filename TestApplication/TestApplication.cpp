@@ -2,8 +2,8 @@
  * EXAM 2022
  */
 
-// Engine / project headers
-#include <AssignmentApplication.h>
+// SphynxEngine / project headers
+#include <TestApplication.h>
 #include <GeometricTools.h>
 #include "gamegrid.h"
 #include <rendering.h>
@@ -44,15 +44,15 @@ const std::vector<glm::vec3> colors {
  * @param name
  * @param version
  */
-Lab4Application::Lab4Application(const std::string& name, const std::string& version)
-    : glfwApp::GLFWApplication(name, version)
+TestApplication::TestApplication(const std::string& name, const std::string& version)
+    : Sphynx::Application(name, version)
 {};
 
 
 /**
  * MAIN PROGRAM
  */
-int Lab4Application::run() {
+int TestApplication::run() {
     {
         /**
          * SETTING UP KEYBINDS AND BEHAVIOUR

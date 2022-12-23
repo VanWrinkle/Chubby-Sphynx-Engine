@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(PROG2002)
+project(ChubbySphynxEngine)
 
 find_package(OpenGL REQUIRED)
 
@@ -11,6 +11,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 add_subdirectory(external)
-add_subdirectory(Engine)
-add_subdirectory(Assignment)
+add_subdirectory(SphynxEngine)
+add_subdirectory(TestApplication)
 

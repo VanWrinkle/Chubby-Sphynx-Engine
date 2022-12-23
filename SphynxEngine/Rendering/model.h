@@ -6,7 +6,7 @@
 #define PROG2002_MODEL_H
 
 
-// Engine / project headers
+// SphynxEngine / project headers
 #include "modelmatrix.h"
 #include "vertexarray.h"
 #include "vertexbuffer.h"

@@ -2,19 +2,19 @@
 // Created by andre on 14.09.22.
 //
 
-#ifndef GLFWAPPLICATION_H
-#define GLFWAPPLICATION_H
+#ifndef SPHYNXAPPLICATION_H
+#define SPHYNXAPPLICATION_H
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "tclap/CmdLine.h"
 
-namespace glfwApp {
+namespace Sphynx {
 
-    class GLFWApplication {
+    class Application {
     public:
-        GLFWApplication(std::string  name, std::string  version);
-        ~GLFWApplication();
+        Application(std::string  name, std::string  version);
+        ~Application();
 
 
 

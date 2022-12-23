@@ -3,7 +3,7 @@
 #ifndef TEXTUREMANAGER_H_
 #define TEXTUREMANAGER_H_
 
-// Engine / Project headers
+// SphynxEngine / Project headers
 #include "model.h"
 
 // External libraries

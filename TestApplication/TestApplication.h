@@ -5,13 +5,13 @@
 #ifndef LAB1_LAB2APPLICATION_H
 #define LAB1_LAB2APPLICATION_H
 
-#include <GLFWApplication.h>
+#include <SphynxApplication.h>
 
-class Lab4Application : public glfwApp::GLFWApplication {
+class TestApplication : public Sphynx::Application {
 private:
 
 public:
-    Lab4Application(const std::string& name, const std::string& version);
+    TestApplication(const std::string& name, const std::string& version);
     int run() override;
 
 };

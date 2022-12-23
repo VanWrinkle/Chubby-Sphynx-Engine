@@ -3,7 +3,7 @@
 //
 
 
-#include <GLFWApplication.h>
+#include <SphynxApplication.h>
 
 #include <utility>
 
@@ -22,13 +22,13 @@ MessageCallback( GLenum source,
 
 
 
-namespace glfwApp {
+namespace Sphynx {
 
-    GLFWApplication::GLFWApplication(std::string  name, std::string  version) :
+    Application::Application(std::string  name, std::string  version) :
                                                                 m_name(std::move(name)),
                                                                 m_version(std::move(version)){}
 
-    GLFWApplication::~GLFWApplication()= default;
+    Application::~Application()= default;
 
     /**
      * Handles parsing of command line arguments
@@ -36,7 +36,7 @@ namespace glfwApp {
      * @param argv
      * @return - EXIT_SUCCESS or EXIT_FAILURE
      */
-    unsigned GLFWApplication::parseArguments(const int &argc, char **argv) {
+    unsigned Application::parseArguments(const int &argc, char **argv) {
         try{
             TCLAP::CmdLine cmd("", ' ', "0.1", false);
             TCLAP::ValueArg<int> widthArg("w", "width", "width of window", false, 800, "int");
@@ -63,7 +63,7 @@ namespace glfwApp {
      *
      * @return
      */
-    unsigned GLFWApplication::initialize(){
+    unsigned Application::initialize(){
 
         if(!glfwInit()) {
             std::cout << "GLFW failed to initialize" << std::endl;
