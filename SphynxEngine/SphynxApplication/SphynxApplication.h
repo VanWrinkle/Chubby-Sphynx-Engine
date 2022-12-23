@@ -1,13 +1,17 @@
 //
 // Created by andre on 14.09.22.
 //
+#ifndef SPHYNX_APPLICATION_H
+#define SPHYNX_APPLICATION_H
 
-#ifndef SPHYNXAPPLICATION_H
-#define SPHYNXAPPLICATION_H
+// External
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <tclap/CmdLine.h>
 
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
-#include "tclap/CmdLine.h"
+
+// STD
+#include <string>
 
 namespace Sphynx {
 
@@ -16,11 +20,9 @@ namespace Sphynx {
         Application(std::string  name, std::string  version);
         ~Application();
 
+        virtual int parseArguments(const int &argc, char **argv);
 
-
-        virtual unsigned parseArguments(const int &argc, char **argv);
-
-        virtual unsigned initialize();
+        virtual int initialize();
 
         virtual int run() = 0;
 
@@ -31,20 +33,6 @@ namespace Sphynx {
         int m_width  {};
         int m_height {};
     };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
-#endif //_GLFWAPPLICATION_H
+#endif //SPHYNX_APPLICATION_H

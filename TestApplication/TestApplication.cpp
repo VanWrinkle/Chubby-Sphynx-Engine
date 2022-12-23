@@ -11,7 +11,6 @@
 
 // External
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 // STD
 #include <memory>
@@ -46,7 +45,7 @@ const std::vector<glm::vec3> colors {
  */
 TestApplication::TestApplication(const std::string& name, const std::string& version)
     : Sphynx::Application(name, version)
-{};
+{ };
 
 
 /**

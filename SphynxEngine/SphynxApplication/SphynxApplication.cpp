@@ -2,10 +2,13 @@
 // Created by andre on 14.09.22.
 //
 
-
+// Sphynx Engine
 #include <SphynxApplication.h>
+#include <log.h>
 
+// STD
 #include <utility>
+#include <sstream>
 
 
 
@@ -26,7 +29,8 @@ namespace Sphynx {
 
     Application::Application(std::string  name, std::string  version) :
                                                                 m_name(std::move(name)),
-                                                                m_version(std::move(version)){}
+                                                                m_version(std::move(version))
+                                                                {}
 
     Application::~Application()= default;
 
@@ -36,7 +40,7 @@ namespace Sphynx {
      * @param argv
      * @return - EXIT_SUCCESS or EXIT_FAILURE
      */
-    unsigned Application::parseArguments(const int &argc, char **argv) {
+    int Application::parseArguments(const int &argc, char **argv) {
         try{
             TCLAP::CmdLine cmd("", ' ', "0.1", false);
             TCLAP::ValueArg<int> widthArg("w", "width", "width of window", false, 800, "int");
@@ -57,34 +61,31 @@ namespace Sphynx {
     }
 
 
-
-
     /**
      *
      * @return
      */
-    unsigned Application::initialize(){
+    int Application::initialize(){
+        //Initialization of static Log class
+        Sphynx::Log::Init();
 
-        if(!glfwInit()) {
-            std::cout << "GLFW failed to initialize" << std::endl;
+        if( !glfwInit() ) {
+            SE_CORE_CRITICAL("Failed to initialize glfw library");
             return EXIT_FAILURE;
         }
 
         glfwSetErrorCallback(GLFWErrorCallback);
-
-
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 
         m_window = glfwCreateWindow(m_width, m_height, (m_name + " " + m_version).data(), nullptr, nullptr);
         glfwMakeContextCurrent(m_window);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            std::cout << "Failed to initialize GLAD" << std::endl;
+            SE_CORE_CRITICAL("Failed to initialize GLAD.");
             glfwTerminate();
             return EXIT_FAILURE;
         }
@@ -96,7 +97,6 @@ namespace Sphynx {
 
         return EXIT_SUCCESS;
     }
-
 }
 
 
@@ -112,18 +112,37 @@ namespace Sphynx {
  * @param userParam
  */
 void GLAPIENTRY
-MessageCallback( GLenum source,
-                 GLenum type,
-                 GLuint id,
-                 GLenum severity,
-                 GLsizei length,
-                 const GLchar* message,
-                 const void* userParam )
+MessageCallback( GLenum source, GLenum type, GLuint id, GLenum severity,
+                 GLsizei length, const GLchar* message, const void* userParam )
 {
-    std::cerr << "\n\nGL CALLBACK:" << ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") <<
-              "type =0x" << type <<
-              ", severity = 0x" << severity <<
-              ", message =" << message << std::endl;
+    std::stringstream errorMessage;
+    errorMessage << "[GL CALLBACK] Type: ";
+    switch(type) {
+        case GL_DEBUG_TYPE_ERROR: errorMessage << "ERROR";                   break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: errorMessage << "DEPRECATED";break;
+        case GL_DEBUG_TYPE_OTHER: errorMessage << "OTHER";                   break;
+        case GL_DEBUG_TYPE_PERFORMANCE: errorMessage << "PERFORMANCE";       break;
+        case GL_DEBUG_TYPE_PORTABILITY: errorMessage << "PORTABILITY";       break;
+        case GL_DEBUG_TYPE_MARKER: errorMessage << "MARKER";                 break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: errorMessage << "UNDEFINED";  break;
+        default:                                                             break;
+    }
+    errorMessage << "   Severity: ";
+    switch(severity) {
+        case GL_DEBUG_SEVERITY_LOW: errorMessage << "LOW";                   break;
+        case GL_DEBUG_SEVERITY_MEDIUM: errorMessage << "MEDIUM";             break;
+        case GL_DEBUG_SEVERITY_HIGH: errorMessage << "HIGH";                 break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: errorMessage << "NOTIFICATION"; break;
+        default: errorMessage << "Invalid Severity";                         break;
+    }
+    errorMessage << std::endl << "Message: " << message << std::endl;
+    switch(severity) {
+        case GL_DEBUG_SEVERITY_LOW: SE_CORE_WARN(errorMessage.str());        break;
+        case GL_DEBUG_SEVERITY_MEDIUM: SE_CORE_ERROR(errorMessage.str());    break;
+        case GL_DEBUG_SEVERITY_HIGH: SE_CORE_CRITICAL(errorMessage.str());   break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: SE_CORE_INFO(errorMessage.str()); break;
+        default: std::cerr << "Invalid error type.";                         break;
+    }
 }
 
 

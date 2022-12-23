@@ -12,6 +12,7 @@ target_link_libraries(TestApplication PUBLIC
         Engine::SphynxApplication
         Engine::Rendering
         Engine::InputHandling
+        Engine::Logging
         tinyobjloader
         )
 
