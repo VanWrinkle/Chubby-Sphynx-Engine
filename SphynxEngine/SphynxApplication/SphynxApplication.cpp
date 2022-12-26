@@ -7,32 +7,17 @@
 #include <log.h>
 
 // STD
-#include <utility>
 #include <sstream>
 
 
 
 void GLFWErrorCallback(int code, const char* description);
 void ivErrorMessage(GLuint type, const GLuint &ID);
-void GLAPIENTRY
-MessageCallback( GLenum source,
-                 GLenum type,
-                 GLuint id,
-                 GLenum severity,
-                 GLsizei length,
-                 const GLchar* message,
-                 const void* userParam );
-
+void GLAPIENTRY MessageCallback( GLenum source, GLenum type, GLuint id, GLenum severity,
+                                 GLsizei length, const GLchar* message, const void* userParam );
 
 
 namespace Sphynx {
-
-    Application::Application(std::string  name, std::string  version) :
-                                                                m_name(std::move(name)),
-                                                                m_version(std::move(version))
-                                                                {}
-
-    Application::~Application()= default;
 
     /**
      * Handles parsing of command line arguments
@@ -74,7 +59,7 @@ namespace Sphynx {
             return EXIT_FAILURE;
         }
 
-        glfwSetErrorCallback(GLFWErrorCallback);
+        glfwSetErrorCallback( GLFWErrorCallback );
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);

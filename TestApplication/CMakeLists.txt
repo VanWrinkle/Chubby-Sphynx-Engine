@@ -11,8 +11,8 @@ target_link_libraries(TestApplication PUBLIC
         Engine::GeometricTools
         Engine::SphynxApplication
         Engine::Rendering
-        Engine::InputHandling
-        Engine::Logging
+        Engine::Core
+        Engine::Math
         tinyobjloader
         )
 

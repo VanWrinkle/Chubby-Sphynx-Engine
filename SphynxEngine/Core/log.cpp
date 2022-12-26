@@ -1,8 +1,12 @@
-//
-// Created by andre on 23.12.22.
-//
+/**
+ *
+ */
 
-#include "log.h"
+// Sphynx Engine
+#include <log.h>
+
+// STD
+#include <memory>
 
 namespace Sphynx {
     std::shared_ptr<spdlog::logger> Log::sm_coreLogger;

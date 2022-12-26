@@ -5,10 +5,11 @@
 #ifndef PROG2002_MOUSE_H
 #define PROG2002_MOUSE_H
 
+// External
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-namespace Input {
+namespace SphynxIO {
 
     class Mouse {
     private:
