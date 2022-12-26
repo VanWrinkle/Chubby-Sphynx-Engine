@@ -60,9 +60,7 @@ namespace RenderCommands {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    inline void disableAlphaMode() {
-        glDisable(GL_BLEND);
-    }
+    inline void disableAlphaMode() { glDisable(GL_BLEND); }
 }
 
 

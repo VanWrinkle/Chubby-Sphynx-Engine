@@ -6,7 +6,7 @@
 #define CHUBBYSPHYNXENGINE_EVENT_H
 
 // Sphynx Engine
-#include <sphynxcore.h>
+#include <SphynxCore.h>
 
 // STD
 #include <string>
@@ -46,6 +46,8 @@ namespace Sphynx {
             return getCategoryFlags() & category;
         }
     };
+
+
 
     class EventDispatcher {
     private:

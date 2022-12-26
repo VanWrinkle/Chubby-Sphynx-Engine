@@ -1,7 +1,7 @@
 
 add_library( Rendering
         freecamera.h
-        rendering.h
+        SphynxRendering.h
         indexbuffer.cpp
         modelmatrix.h
         rendercommands.h

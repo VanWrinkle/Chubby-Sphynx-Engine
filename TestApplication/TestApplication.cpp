@@ -6,8 +6,8 @@
 #include <TestApplication.h>
 #include <GeometricTools.h>
 #include "gamegrid.h"
-#include <rendering.h>
-#include <sphynxcore.h>
+#include <SphynxRendering.h>
+#include <SphynxCore.h>
 #include <sphynxmath.h>
 
 // STD
@@ -54,28 +54,28 @@ int TestApplication::run() {
          * SETTING UP KEYBINDS AND BEHAVIOUR
          */
 
-        SphynxIO::Keyboard::setKeyBehaviour(SphynxIO::KeyCode::Space, SphynxIO::KeyMode::CONTINUOUS);
-        glfwSetKeyCallback(m_window, SphynxIO::Keyboard::callback);
-        SphynxIO::KeyCode left = SphynxIO::KeyCode::A;
-        SphynxIO::KeyCode right = SphynxIO::KeyCode::D;
-        SphynxIO::KeyCode zoomIn = SphynxIO::KeyCode::W;
-        SphynxIO::KeyCode zoomOut = SphynxIO::KeyCode::S;
-        SphynxIO::KeyCode up = SphynxIO::KeyCode::C;
-        SphynxIO::KeyCode forwards = SphynxIO::KeyCode::X;
-        SphynxIO::KeyCode forwardsFast = SphynxIO::KeyCode::Space;
-        SphynxIO::KeyCode down = SphynxIO::KeyCode::LeftShift;
-        SphynxIO::KeyCode exit = SphynxIO::KeyCode::Escape;
-        SphynxIO::KeyCode wireframeToggle = SphynxIO::KeyCode::T;
+        Sphynx::Keyboard::setKeyBehaviour(Sphynx::KeyCode::Space, Sphynx::KeyMode::CONTINUOUS);
+        glfwSetKeyCallback(m_window, Sphynx::Keyboard::callback);
+        Sphynx::KeyCode left = Sphynx::KeyCode::A;
+        Sphynx::KeyCode right = Sphynx::KeyCode::D;
+        Sphynx::KeyCode zoomIn = Sphynx::KeyCode::W;
+        Sphynx::KeyCode zoomOut = Sphynx::KeyCode::S;
+        Sphynx::KeyCode up = Sphynx::KeyCode::C;
+        Sphynx::KeyCode forwards = Sphynx::KeyCode::X;
+        Sphynx::KeyCode forwardsFast = Sphynx::KeyCode::Space;
+        Sphynx::KeyCode down = Sphynx::KeyCode::LeftShift;
+        Sphynx::KeyCode exit = Sphynx::KeyCode::Escape;
+        Sphynx::KeyCode wireframeToggle = Sphynx::KeyCode::T;
 
-        SphynxIO::Mouse mouse(m_window);
+        Sphynx::Mouse mouse(m_window);
 
 
-        SphynxIO::Keyboard::setKeyBehaviour(forwardsFast, SphynxIO::KeyMode::CONTINUOUS);
-        SphynxIO::Keyboard::setKeyBehaviour(down, SphynxIO::KeyMode::CONTINUOUS);
-        SphynxIO::Keyboard::setKeyBehaviour(zoomIn, SphynxIO::KeyMode::CONTINUOUS);
-        SphynxIO::Keyboard::setKeyBehaviour(zoomOut, SphynxIO::KeyMode::CONTINUOUS);
-        SphynxIO::Keyboard::setKeyBehaviour(left, SphynxIO::KeyMode::CONTINUOUS);
-        SphynxIO::Keyboard::setKeyBehaviour(right, SphynxIO::KeyMode::CONTINUOUS);
+        Sphynx::Keyboard::setKeyBehaviour(forwardsFast, Sphynx::KeyMode::CONTINUOUS);
+        Sphynx::Keyboard::setKeyBehaviour(down, Sphynx::KeyMode::CONTINUOUS);
+        Sphynx::Keyboard::setKeyBehaviour(zoomIn, Sphynx::KeyMode::CONTINUOUS);
+        Sphynx::Keyboard::setKeyBehaviour(zoomOut, Sphynx::KeyMode::CONTINUOUS);
+        Sphynx::Keyboard::setKeyBehaviour(left, Sphynx::KeyMode::CONTINUOUS);
+        Sphynx::Keyboard::setKeyBehaviour(right, Sphynx::KeyMode::CONTINUOUS);
 
         /**
          * SHADER COMPILATION
@@ -304,11 +304,11 @@ int TestApplication::run() {
             if( movementTimer < 0 && !dropping) {
                 gameGrid.moveForward();
                 movementTimer = timerMax;
-            } else if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::X) && !dropping) {
+            } else if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::X) && !dropping) {
                 gameGrid.moveForward();
                 movementTimer = timerMax;
                 secondaryTimer = secondaryTimerMax;
-            } else if (SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::J) && !dropping) {
+            } else if (Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::J) && !dropping) {
                 dropping = true;
             }
             if(dropping) {
@@ -322,7 +322,7 @@ int TestApplication::run() {
                 }
             }
 
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::C)) {
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::C)) {
                 flyCam = !flyCam;
                 if(flyCam) {
                     mouse.captureMouse();
@@ -333,7 +333,7 @@ int TestApplication::run() {
                 }
             }
 
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::K)) {
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::K)) {
                 camLight = !camLight;
                 if(camLight) {
                     lightsManager["cameraLight"].isActive = true;
@@ -350,22 +350,22 @@ int TestApplication::run() {
 
 
             if( !flyCam ) {
-                if(SphynxIO::Keyboard::isKeyActive(left )) {
+                if(Sphynx::Keyboard::isKeyActive(left )) {
                     rotation += rotationRate * dt;
                 }
-                if(SphynxIO::Keyboard::isKeyActive(right )) {
+                if(Sphynx::Keyboard::isKeyActive(right )) {
                     rotation -= rotationRate * dt;
                 }
-                if(SphynxIO::Keyboard::isKeyActive(zoomIn )) {
+                if(Sphynx::Keyboard::isKeyActive(zoomIn )) {
                     cameraDistance = std::max(minDistance, cameraDistance - zoomRate * dt);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(zoomOut )) {
+                if(Sphynx::Keyboard::isKeyActive(zoomOut )) {
                     cameraDistance = std::min(maxDistance, cameraDistance + zoomRate * dt);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(down )) {
+                if(Sphynx::Keyboard::isKeyActive(down )) {
                     cameraHeight -= zoomRate * dt;
                 }
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Space )) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Space )) {
                     cameraHeight += zoomRate * dt;
                 }
 
@@ -385,22 +385,22 @@ int TestApplication::run() {
             } else {
                 camera.mouseInput(mouse.getMouseDelta()*0.05f);
                 glm::vec3 direction {};
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::A)) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::A)) {
                     direction +=  glm::vec3(-1.0f, 0.0f, 0.0f);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::D)) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::D)) {
                     direction +=  glm::vec3(1.0f, 0.0f, 0.0f);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::W)) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::W)) {
                     direction +=  glm::vec3(0.0f, 0.0f, 1.0f);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::S)) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::S)) {
                     direction +=  glm::vec3(0.0f, 0.0f, -1.0f);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::LeftShift)) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::LeftShift)) {
                     direction +=  glm::vec3(0.0f, -1.0f, 0.0f);
                 }
-                if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Space)) {
+                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Space)) {
                     direction +=  glm::vec3(0.0f, 1.0f, 0.0f);
                 }
                 if(direction.x || direction.y || direction.z) {
@@ -419,27 +419,27 @@ int TestApplication::run() {
 
 
             // Handling directional movement
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Left)){
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Left)){
                 gameGrid.move(Direction::RIGHT);
             }
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Right)){
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Right)){
                 gameGrid.move(Direction::LEFT);
             }
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Up)){
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Up)){
                 gameGrid.move(Direction::UP);
             }
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Down)){
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Down)){
                 gameGrid.move(Direction::DOWN);
             }
 
             // Toggles texturing
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::T)) {
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::T)) {
                 generalShader.uploadUniformInt("u_texturing", !texturing);
                 texturing = !texturing;
             }
 
             // Toggles lighting
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::L)) {
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::L)) {
                 generalShader.uploadUniformInt("u_lighting", !lighting);
                 lighting = !lighting;
             }
@@ -546,7 +546,7 @@ int TestApplication::run() {
             RenderCommands::clear();
             glfwPollEvents();
 
-            if(SphynxIO::Keyboard::isKeyActive(SphynxIO::KeyCode::Escape )) {
+            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Escape )) {
                 glfwSetWindowShouldClose(m_window, GL_TRUE);
             }
         }

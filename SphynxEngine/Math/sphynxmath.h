@@ -11,9 +11,6 @@
 namespace sem {
     using namespace glm;
 
-
-
-
     template <typename T>
     float min (const T &val, const T &val2) {
         return (val < val2) ? val : val2;
@@ -55,6 +52,16 @@ namespace sem {
     template <typename T>
     float smootherstep(const T &edge0, const T &edge1, T x) {
         x = clamp(0.0f, 1.0f, (x - edge0) / (edge1 - edge0));
+        return x * x * x * ( x * (x * 6 - 15) + 10);
+    }
+
+    // Assumes an x in range 0..1
+    float smoothstepSimple ( const float &x ){
+        return x * x * (3 - 2 * x);
+    }
+
+    // Assumes an x in range 0..1
+    float smootherstepSimple( const float &x ) {
         return x * x * x * ( x * (x * 6 - 15) + 10);
     }
 

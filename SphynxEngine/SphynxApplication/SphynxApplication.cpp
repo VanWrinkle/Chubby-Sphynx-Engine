@@ -3,8 +3,8 @@
 //
 
 // Sphynx Engine
-#include <SphynxApplication.h>
-#include <log.h>
+#include "SphynxApplication.h"
+#include <SphynxCore.h>
 
 // STD
 #include <sstream>

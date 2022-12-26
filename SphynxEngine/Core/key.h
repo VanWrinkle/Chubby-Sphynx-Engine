@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <iostream>
 
-namespace SphynxIO {
+namespace Sphynx {
 
     enum class KeyMode {
         CONTINUOUS,

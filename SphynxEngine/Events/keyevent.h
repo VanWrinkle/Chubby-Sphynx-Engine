@@ -7,30 +7,65 @@
 
 // Sphynx Engine
 #include "event.h"
-
+#include <SphynxCore.h>
 
 // STD
+#include <string>
+#include <sstream>
 
-class KeyEvent {
-private:
-    int m_keyCode;
-public:
-    KeyEvent(const int & code) {
 
-    }
-};
+namespace Sphynx {
 
-class KeyPressEvent : public KeyEvent {
+    /**
+     * Abstract cass basis for KeyPressEvent, KeyReleaseEvent and KeyRepeatEvent
+     */
+    class KeyEvent : public Event{
+    protected:
+        Sphynx::KeyCode m_keyCode;
+        KeyEvent(const KeyCode & keyCode) : m_keyCode(keyCode) {}
 
-};
+    public:
+        KeyCode getKeyCode() { return m_keyCode; }
+        int getCategoryFlags() const override { return EventCategoryKeyboard | EventCategoryInput; }
 
-class KeyReleaseEvent : public KeyEvent {
+    };
 
-};
 
-class KeyRepeatEvent : public KeyEvent  {
+    class KeyPressEvent : public KeyEvent {
+    public:
+        KeyPressEvent( const KeyCode &keyCode ) : KeyEvent(keyCode) {}
+        std::string toString() const override {
+            std::stringstream ss;
+            ss << "KeyPressEvent: " << static_cast<int>(m_keyCode);
+            return ss.str();
+        }
+        static EventType getStaticType() { return EventType::KeyPressed; }
+    };
 
-};
+
+    class KeyReleaseEvent : public KeyEvent {
+    public:
+        KeyReleaseEvent( const KeyCode &keyCode ) : KeyEvent( keyCode ) {}
+        std::string toString() const override {
+            std::stringstream ss;
+            ss << "KeyPressEvent: " << static_cast<int>(m_keyCode);
+            return ss.str();
+        }
+        static EventType getStaticType() { return EventType::KeyReleased; }
+    };
+
+
+    class KeyRepeatEvent : public KeyEvent  {
+    public:
+        KeyRepeatEvent( const KeyCode &keyCode ) : KeyEvent( keyCode ) {}
+        std::string toString() const override {
+            std::stringstream ss;
+            ss << "KeyRepeatEvent: " << static_cast<int>(m_keyCode);
+            return ss.str();
+        }
+        static EventType getStaticType() { return EventType::KeyRepeat; }
+    };
+}
 
 
 
