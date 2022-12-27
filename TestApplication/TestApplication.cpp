@@ -54,7 +54,9 @@ int TestApplication::run() {
          * SETTING UP KEYBINDS AND BEHAVIOUR
          */
 
-        Sphynx::Keyboard::setKeyBehaviour(Sphynx::KeyCode::Space, Sphynx::KeyMode::CONTINUOUS);
+
+
+        Sphynx::Keyboard::setKeyBehaviour(Sphynx::Key::Space, Sphynx::KeyMode::CONTINUOUS);
         glfwSetKeyCallback(m_window, Sphynx::Keyboard::callback);
         Sphynx::KeyCode left = Sphynx::KeyCode::A;
         Sphynx::KeyCode right = Sphynx::KeyCode::D;
@@ -68,7 +70,6 @@ int TestApplication::run() {
         Sphynx::KeyCode wireframeToggle = Sphynx::KeyCode::T;
 
         Sphynx::Mouse mouse(m_window);
-
 
         Sphynx::Keyboard::setKeyBehaviour(forwardsFast, Sphynx::KeyMode::CONTINUOUS);
         Sphynx::Keyboard::setKeyBehaviour(down, Sphynx::KeyMode::CONTINUOUS);
@@ -108,14 +109,7 @@ int TestApplication::run() {
         float rotationRate = 2.0f;
 
 
-
-
-        sem::lerp(glm::vec2(1), glm::vec2(1), 0.5);
-
-        glm::vec3 cameraPosition(0.0f,
-                                 0.0f,
-                                 -5);
-
+        sem::vec3 cameraPosition(0.0f, 0.0f, -5);
         PerspectiveCamera camera(frustum, cameraPosition);
 
 

@@ -6,7 +6,10 @@
 #define CHUBBYSPHYNXENGINE_SPHYNXCORE_H
 
 #include <log.h>
-#include <key.h>
+#include <KeyCodes.h>
 #include <mouse.h>
+#include <MouseCodes.h>
+
+
 
 #endif //CHUBBYSPHYNXENGINE_SPHYNXCORE_H

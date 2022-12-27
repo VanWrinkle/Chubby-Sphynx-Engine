@@ -3,7 +3,7 @@
 //
 
 // Sphynx Engine
-#include <event.h>
+#include <Event.h>
 
 // STD
 

@@ -6,7 +6,7 @@
 #define CHUBBYSPHYNXENGINE_KEYEVENT_H
 
 // Sphynx Engine
-#include "event.h"
+#include "Event.h"
 #include <SphynxCore.h>
 
 // STD
@@ -33,37 +33,48 @@ namespace Sphynx {
 
     class KeyPressEvent : public KeyEvent {
     public:
-        KeyPressEvent( const KeyCode &keyCode ) : KeyEvent(keyCode) {}
-        std::string toString() const override {
+        explicit KeyPressEvent( const KeyCode &keyCode ) : KeyEvent(keyCode) {}
+
+        [[nodiscard]] std::string toString() const override {
             std::stringstream ss;
             ss << "KeyPressEvent: " << static_cast<int>(m_keyCode);
             return ss.str();
         }
+
         static EventType getStaticType() { return EventType::KeyPressed; }
+        EventType getEventType() const override { return getStaticType(); }
+        const char * getName() const override { return "KeyPressed"; }
+
     };
 
 
     class KeyReleaseEvent : public KeyEvent {
     public:
-        KeyReleaseEvent( const KeyCode &keyCode ) : KeyEvent( keyCode ) {}
+        explicit KeyReleaseEvent( const KeyCode &keyCode ) : KeyEvent( keyCode ) {}
         std::string toString() const override {
             std::stringstream ss;
-            ss << "KeyPressEvent: " << static_cast<int>(m_keyCode);
+            ss << "KeyReleaseEvent: " << static_cast<int>(m_keyCode);
             return ss.str();
         }
         static EventType getStaticType() { return EventType::KeyReleased; }
+        EventType getEventType() const override { return getStaticType(); }
+        const char * getName() const override { return "KeyReleased"; }
+
     };
 
 
     class KeyRepeatEvent : public KeyEvent  {
     public:
-        KeyRepeatEvent( const KeyCode &keyCode ) : KeyEvent( keyCode ) {}
-        std::string toString() const override {
+        explicit KeyRepeatEvent( const KeyCode &keyCode ) : KeyEvent( keyCode ) {}
+        [[nodiscard]] std::string toString() const override {
             std::stringstream ss;
             ss << "KeyRepeatEvent: " << static_cast<int>(m_keyCode);
             return ss.str();
         }
         static EventType getStaticType() { return EventType::KeyRepeat; }
+        EventType getEventType() const override { return getStaticType(); }
+        const char * getName() const override { return "KeyRepeat"; }
+
     };
 }
 

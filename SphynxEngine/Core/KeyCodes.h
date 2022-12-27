@@ -154,7 +154,7 @@ namespace Sphynx {
 
         Menu = GLFW_KEY_MENU,
         Last = GLFW_KEY_MENU
-    };
+    } typedef Key;
 
 
 
@@ -243,8 +243,6 @@ namespace Sphynx {
             }
             return false;
         }
-
-
     };
 }
 

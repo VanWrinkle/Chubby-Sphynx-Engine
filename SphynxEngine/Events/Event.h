@@ -12,8 +12,6 @@
 #include <string>
 #include <functional>
 
-#define BIT(x) (1 << x)
-
 namespace Sphynx {
 
     enum class EventType {
@@ -23,11 +21,11 @@ namespace Sphynx {
     };
 
     enum EventCategory {
-        EventCategoryApplication = BIT(0),
-        EventCategoryInput       = BIT(1),
-        EventCategoryKeyboard    = BIT(2),
-        EventCategoryMouse       = BIT(3),
-        EventCategoryMouseButton = BIT(4)
+        EventCategoryApplication = 1,
+        EventCategoryInput       = 2,
+        EventCategoryKeyboard    = 4,
+        EventCategoryMouse       = 8,
+        EventCategoryMouseButton = 16
     };
 
 
@@ -47,6 +45,9 @@ namespace Sphynx {
         }
     };
 
+#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
+								virtual EventType GetEventType() const override { return GetStaticType(); }\
+								virtual const char* GetName() const override { return #type; }
 
 
     class EventDispatcher {
@@ -58,7 +59,7 @@ namespace Sphynx {
 
         template < typename T, typename F >
         bool Dispatch(const F& func) {
-            if(m_event.getEventType() == T::GetStaticType()) {
+            if(m_event.getEventType() == T::getStaticType()) {
                 m_event.m_handled |= func(static_cast<T&>(m_event));
                 return true;
             }
