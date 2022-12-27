@@ -45,11 +45,6 @@ namespace Sphynx {
         }
     };
 
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
-								virtual EventType GetEventType() const override { return GetStaticType(); }\
-								virtual const char* GetName() const override { return #type; }
-
-
     class EventDispatcher {
     private:
         Event& m_event;
@@ -70,5 +65,7 @@ namespace Sphynx {
     inline std::ostream& operator<<(std::ostream& os, const Event& e) {
         return os << e.toString();
     }
+
+
 }
 #endif //CHUBBYSPHYNXENGINE_EVENT_H
