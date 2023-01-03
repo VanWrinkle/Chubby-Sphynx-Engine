@@ -5,10 +5,11 @@
 #ifndef PROG2002_MOUSE_H
 #define PROG2002_MOUSE_H
 
+// External
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-namespace Input {
+namespace Sphynx {
 
     class Mouse {
     private:
@@ -66,8 +67,6 @@ namespace Input {
         void releaseMouse() {
             glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
-
-
     };
 }
 

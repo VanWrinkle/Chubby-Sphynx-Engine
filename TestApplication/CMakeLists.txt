@@ -1,21 +1,22 @@
 
-project(Assignment)
+project(Test)
 
-add_library(AssignmentApplication
+add_library(TestApplication
         gamegrid.h
-        AssignmentApplication.cpp
+        TestApplication.cpp
         )
-target_include_directories(AssignmentApplication PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
+target_include_directories(TestApplication PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
-target_link_libraries(AssignmentApplication PUBLIC
+target_link_libraries(TestApplication PUBLIC
         Engine::GeometricTools
-        Engine::GLFWApplication
+        Engine::SphynxApplication
         Engine::Rendering
-        Engine::InputHandling
+        Engine::Core
+        Engine::Math
         tinyobjloader
         )
 
-target_compile_definitions(AssignmentApplication PRIVATE
+target_compile_definitions(TestApplication PRIVATE
         OBJECTS_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/objects/"
         TEXTURES_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/"
         SHADERS_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/shaders/"
@@ -23,7 +24,7 @@ target_compile_definitions(AssignmentApplication PRIVATE
 
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE AssignmentApplication)
+target_link_libraries(${PROJECT_NAME} PRIVATE TestApplication)
 
 
 add_custom_command(
