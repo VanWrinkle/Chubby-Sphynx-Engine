@@ -22,8 +22,6 @@ namespace Sphynx {
             ss << "MouseButtonPressed: " << static_cast<int>(m_mouseCode);
             return ss.str();
         }
-
-
         MouseCode getMouseCode() { return m_mouseCode; }
         int getCategoryFlags() const override { return EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton; }
         static EventType getStaticType() { return EventType::MouseButtonPressed; }
@@ -65,7 +63,6 @@ namespace Sphynx {
             ss << "MouseMovedEvent: x: " << m_xDelta << " y: " << m_yDelta;
             return ss.str();
         }
-
         float getX() { return m_xDelta; }
         float getY() { return m_yDelta; }
         int getCategoryFlags() const override { return EventCategoryMouse | EventCategoryInput; }
@@ -89,7 +86,6 @@ namespace Sphynx {
             ss << "MouseScrolledEvent: x: " << m_xDelta << " y: " << m_yDelta;
             return ss.str();
         }
-
         float getX() { return m_xDelta; }
         float getY() { return m_yDelta; }
         int getCategoryFlags() const override { return EventCategoryMouse | EventCategoryInput; }

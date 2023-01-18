@@ -1,5 +1,5 @@
-add_library(Core KeyCodes.h log.cpp mouse.h SphynxCore.h MouseCodes.h)
+add_library(Core KeyCodes.h log.cpp mouse.h SphynxCore.h MouseCodes.h Window.h)
 target_compile_definitions( Core PUBLIC SPHYNX_DEBUG ) #Remove for release
 target_include_directories(Core PUBLIC .)
-target_link_libraries(Core PUBLIC spdlog glm glfw)
+target_link_libraries(Core PUBLIC spdlog glm glfw Engine::Events)
 add_library(Engine::Core ALIAS Core)
