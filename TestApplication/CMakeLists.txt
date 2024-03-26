@@ -1,5 +1,4 @@
-
-project(Test)
+project(ChubbyEngineAppTest)
 
 add_library(TestApplication
         gamegrid.h

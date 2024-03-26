@@ -14,6 +14,99 @@
 #include <memory>
 #include <random>
 
+class AxisIndicator {
+private:
+    inline static Shader *m_shader = nullptr;
+    inline static unsigned m_vertexArray = 0;
+
+private:
+    AxisIndicator() = default;
+    static void SetupVertexArray () {
+        glGenVertexArrays(1, &m_vertexArray);
+        if (m_vertexArray == 0) {
+            throw std::runtime_error(
+                    "No vertexArray generated when attempting to draw Axis Indicator"
+            );
+        }
+        glBindVertexArray(m_vertexArray);
+
+        std::array<float, 6 * 6> AxisIndicatorLineTopology = {
+                0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f,   0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 1.0f,
+        };
+        unsigned vertexBufferID = 0;
+        glGenBuffers(1, &vertexBufferID);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+        if (m_vertexArray == 0) {
+            throw std::runtime_error(
+                    "No vertex buffer generated when attempting to draw Axis Indicator"
+            );
+        }
+        glBufferData(
+                GL_ARRAY_BUFFER,
+                AxisIndicatorLineTopology.size()*4,
+                AxisIndicatorLineTopology.data(),
+                GL_DYNAMIC_DRAW
+        );
+        bool normalized = false;
+        glVertexAttribPointer(0, 3, GL_FLOAT, normalized, 6*sizeof(float), nullptr);
+        glVertexAttribPointer(1, 3, GL_FLOAT, normalized, 6*sizeof(float), (void*)(3*sizeof(float)));
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+    }
+
+    static void SetupShaderProgram () {
+
+        std::string vertexShaderSource =
+                "#version 460 core\n"
+                "layout (location = 0) in vec3 aPos;\n"
+                "layout (location = 1) in vec3 color;\n"
+                "out vec4 vertexColor;\n"
+                "uniform mat4 u_projection;\n"
+                "uniform mat4 u_modelMatrix;\n"
+                "uniform mat4 u_view;\n"
+                "void main()\n"
+                "{\n"
+                "    gl_Position = u_projection * u_view * u_modelMatrix * vec4(aPos, 1.0);\n"
+                "    vertexColor = vec4(color, 1.0);\n"
+                "}";
+
+        std::string fragmentShaderSource =
+                "#version 460 core\n"
+                "out vec4 FragColor;\n"
+                "in vec4 vertexColor;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    FragColor = vertexColor;\n"
+                "} ";
+
+        m_shader = new Shader(vertexShaderSource, fragmentShaderSource);
+    }
+
+
+public:
+    static void Draw(ModelMatrix matrix, Camera &camera) {
+        if (m_shader == nullptr) {
+            AxisIndicator::SetupShaderProgram();
+        }
+        if (m_vertexArray == 0) {
+            AxisIndicator::SetupVertexArray();
+        }
+        glBindVertexArray(m_vertexArray);
+        //glUseProgram(m_shaderProgram);
+        m_shader->use();
+        m_shader->uploadUniformMat4("u_modelMatrix", matrix.getMatrix());
+        m_shader->uploadUniformMat4("u_projection", camera.getProjectionMatrix());
+        m_shader->uploadUniformMat4("u_view", camera.getViewMatrix());
+        glDrawArrays(GL_LINES, 0, 6);
+    }
+};
+
 
 
 
@@ -282,7 +375,7 @@ int TestApplication::run() {
         ************************************************************************************/
 
         while(!glfwWindowShouldClose(m_window)) {
-
+            generalShader.use();
             // Updating time
             previousFrame = currentFrame;
             currentFrame = glfwGetTime();
@@ -473,6 +566,7 @@ int TestApplication::run() {
 
 
 
+
             /************************************************************************************
             // Rendering Stopped Cubes
             ************************************************************************************/
@@ -543,6 +637,9 @@ int TestApplication::run() {
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Escape )) {
                 glfwSetWindowShouldClose(m_window, GL_TRUE);
             }
+            ModelMatrix gizmoMatrix = ModelMatrix();
+            gizmoMatrix.setScale(glm::vec3(3.0f));
+            AxisIndicator::Draw(gizmoMatrix, camera);
         }
     }
     glfwTerminate(); //TODO: Some memory leak apparently associated with x11. Check for bug free version if time permits.

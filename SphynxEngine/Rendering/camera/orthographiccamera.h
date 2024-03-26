@@ -5,9 +5,9 @@
 #ifndef ORTHOGRAPHICCAMERA_H_
 #define ORTHOGRAPHICCAMERA_H_
 
-#include <camera.h>
+#include "camera/camera.h"
 
-#include <glm/fwd.hpp>
+#include "glm/fwd.hpp"
 
 #include <array>
 

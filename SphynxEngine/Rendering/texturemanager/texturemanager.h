@@ -4,11 +4,11 @@
 #define TEXTUREMANAGER_H_
 
 // SphynxEngine / Project headers
-#include "model.h"
+#include "modelsystem/model.h"
 
 // External libraries
-#include <glad/glad.h>
-#include <stb_image.h>
+#include "glad/glad.h"
+#include "stb_image.h"
 
 // STD includes
 #include <string>
@@ -43,7 +43,8 @@ private:
 
 public:
     static TextureManager* GetInstance()
-    {return TextureManager::Instance != nullptr?TextureManager::Instance: TextureManager::Instance = new TextureManager(); }
+    {
+        return TextureManager::Instance != nullptr ? TextureManager::Instance: TextureManager::Instance = new TextureManager(); }
 
 public:
     bool LoadTexture2DRGBA(const std::string& name, const std::string& filepath, bool mipMap=true);

@@ -1,8 +1,8 @@
 #ifndef PERSPECTIVECAMERA_H_
 #define PERSPECTIVECAMERA_H_
 
-#include <camera.h>
-#include <glm/gtc/matrix_transform.hpp>
+#include "camera/camera.h"
+#include "glm/gtc/matrix_transform.hpp"
 #include <array>
 
 const float RAD_TO_DEGREES = 180.0f / M_PI;

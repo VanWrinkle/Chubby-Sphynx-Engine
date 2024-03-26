@@ -5,7 +5,7 @@
 #ifndef PROG2002_LIGHTS_H
 #define PROG2002_LIGHTS_H
 
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 #include <map>
 
 std::vector<glm::vec3> distanceTable = {

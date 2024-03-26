@@ -1,20 +1,21 @@
 
 add_library( Rendering
-        freecamera.h
+        camera/freecamera.h
         SphynxRendering.h
-        indexbuffer.cpp
-        modelmatrix.h
-        rendercommands.h
-        shader.cpp
-        shadersdatatype.h
-        vertexarray.cpp
-        vertexbuffer.cpp
-        texturemanager.cpp
-        lights.h
-        camera.h
-        perspectivecamera.h
-        model.cpp
+        buffers/indexbuffer.cpp
+        modelsystem/modelmatrix.h
+        gl_control/rendercommands.h
+        shader/shader.cpp
+        shader/shadersdatatype.h
+        buffers/vertexarray.cpp
+        buffers/vertexbuffer.cpp
+        texturemanager/texturemanager.cpp
+        lighting/lights.h
+        camera/camera.h
+        camera/perspectivecamera.h
+        modelsystem/model.cpp
         )
+
 target_include_directories(Rendering PUBLIC .)
 
 add_library(Engine::Rendering ALIAS Rendering)

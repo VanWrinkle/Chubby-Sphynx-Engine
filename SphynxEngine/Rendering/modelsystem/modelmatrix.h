@@ -5,9 +5,9 @@
 #ifndef PROG2002_MODELMATRIX_H
 #define PROG2002_MODELMATRIX_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 /**
  * Encapsulates operations to transform an object globally or locally

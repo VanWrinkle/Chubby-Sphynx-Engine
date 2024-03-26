@@ -8,14 +8,14 @@
 
 // SphynxEngine / project headers
 #include "modelmatrix.h"
-#include "vertexarray.h"
-#include "vertexbuffer.h"
-#include "indexbuffer.h"
-#include "shader.h"
+#include "buffers/vertexarray.h"
+#include "buffers/vertexbuffer.h"
+#include "buffers/indexbuffer.h"
+#include "shader/shader.h"
 #include "material.h"
 
 //External
-#include <tiny_obj_loader.h>
+#include "tiny_obj_loader.h"
 
 //STD
 #include <set>
