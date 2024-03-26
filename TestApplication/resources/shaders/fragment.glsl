@@ -71,6 +71,7 @@ void main() {
     Material material;
     material = u_materials[vs_matID];
     vec3 viewDir = normalize(vs_viewDir);
+
     vec3 normal;
     normal = texture(u_textures[material.normalTextureIndex], vs_UVcoord).rgb;
     normal = normal*2.0 - 1.0;

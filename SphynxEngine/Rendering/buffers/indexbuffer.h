@@ -5,7 +5,7 @@
 #ifndef PROG2002_INDEXBUFFER_H
 #define PROG2002_INDEXBUFFER_H
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 /**
  * Class wrapping an index/element buffer

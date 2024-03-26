@@ -5,10 +5,10 @@
 #ifndef PROG2002_VERTEXARRAY_H
 #define PROG2002_VERTEXARRAY_H
 
-#include <glad/glad.h>
-#include "shadersdatatype.h"
+#include "glad/glad.h"
+#include "shader/shadersdatatype.h"
 #include "vertexbuffer.h"
-#include "indexbuffer.h"
+#include "buffers/indexbuffer.h"
 #include <string>
 #include <vector>
 #include <memory>

@@ -5,10 +5,10 @@
 #ifndef PROG2002_RENDERCOMMANDS_H
 #define PROG2002_RENDERCOMMANDS_H
 
-#include <glad/glad.h>
-#include "indexbuffer.h"
-#include "vertexarray.h"
-#include <glm/glm.hpp>
+#include "glad/glad.h"
+#include "buffers/indexbuffer.h"
+#include "buffers/vertexarray.h"
+#include "glm/glm.hpp"
 
 namespace RenderCommands {
 

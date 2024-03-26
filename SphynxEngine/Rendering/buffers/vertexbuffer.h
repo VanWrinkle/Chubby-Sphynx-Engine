@@ -5,8 +5,8 @@
 #ifndef PROG2002_VERTEXBUFFER_H
 #define PROG2002_VERTEXBUFFER_H
 
-#include <glad/glad.h>
-#include "bufferlayout.h"
+#include "glad/glad.h"
+#include "buffers/bufferlayout.h"
 
 /**
  * Class wrapping a vertex buffer object

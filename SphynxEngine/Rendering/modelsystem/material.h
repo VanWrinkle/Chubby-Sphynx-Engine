@@ -6,7 +6,7 @@
 #define PROG2002_MATERIAL_H
 
 // external
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 // STD
 #include <string>
 

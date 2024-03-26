@@ -5,7 +5,7 @@
 #ifndef PROG2002_BUFFERLAYOUT_H
 #define PROG2002_BUFFERLAYOUT_H
 
-#include "shadersdatatype.h"
+#include "shader/shadersdatatype.h"
 #include <string>
 #include <vector>
 
@@ -21,8 +21,12 @@ struct bufferAttribute {
     GLboolean      normalized;      ///<
 
     bufferAttribute(shaderDataType type, std::string name, GLboolean normalized = false)
-            : name(std::move(name)), type(type), size(shaderDataTypeSize(type)),
-              offset(0), normalized(normalized){};
+            : name(std::move(name)),
+            type(type),
+            size(shaderDataTypeSize(type)),
+            offset(0),
+            normalized(normalized)
+            {};
 };
 
 
@@ -58,7 +62,10 @@ public:
      *
      * @param attributes
      */
-    BufferLayout(const std::initializer_list<bufferAttribute> &attributes) : m_attributes(attributes) {
+    BufferLayout(const std::initializer_list<bufferAttribute> &attributes)
+    : m_attributes(attributes),
+    m_stride(0)
+    {
         calculateOffsetAndStride();
     }
 

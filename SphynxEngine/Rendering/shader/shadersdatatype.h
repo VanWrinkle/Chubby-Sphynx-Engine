@@ -1,7 +1,7 @@
 #ifndef SHADERSDATATYPES_H_
 #define SHADERSDATATYPES_H_
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 // =============================================================================
 // shaderDataType enum

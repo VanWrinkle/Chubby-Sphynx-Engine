@@ -28,7 +28,14 @@ namespace GeoTools {
         1, 0, 2, 0, 3, 2
     };
 
-
+    constexpr std::array<float, 6 * 6> AxisIndicatorLineTopology = {
+            0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f,   0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 1.0f,
+    };
 
     constexpr std::array<float, 24*11> UnitCubeVertices  = {
             // y face

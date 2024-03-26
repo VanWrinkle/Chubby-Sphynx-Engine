@@ -2,7 +2,6 @@
 // Created by andre on 23.09.22.
 //
 #include "vertexarray.h"
-#include "bufferlayout.h"
 #include <iostream>
 
 VertexArray::VertexArray() {
