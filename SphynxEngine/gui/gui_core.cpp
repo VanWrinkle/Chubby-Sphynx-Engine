@@ -17,7 +17,6 @@ namespace sphynx {
         ImGui::StyleColorsDark();
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glslVersion.data());
-        const ImVec4 clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     }
 
     void guiLoopStart() {
@@ -26,8 +25,12 @@ namespace sphynx {
         ImGui::NewFrame();
     }
 
-    void guiRender() {
+    void guiRender(GLFWwindow* window) {
         ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     void guiDemo(bool show_another_window) {

@@ -6,6 +6,7 @@
 #define CHUBBYSPHYNXENGINE_GUI_CORE_H
 
 #include <string>
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 namespace sphynx {
@@ -13,7 +14,7 @@ namespace sphynx {
 
     void guiLoopStart();
 
-    void guiRender();
+    void guiRender(GLFWwindow* window);
 
     void guiDemo(bool show_another_window);
 

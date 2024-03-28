@@ -635,8 +635,8 @@ int TestApplication::run() {
             RenderCommands::disableAlphaMode();
             generalShader.uploadUniformFloat("u_opaqueness", 1.0f);
 
-            sphynx::guiRender();
 
+            sphynx::guiRender(m_window);
             // Reset for new frame
             glfwSwapBuffers(m_window);
             RenderCommands::clear();
