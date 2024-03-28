@@ -29,7 +29,7 @@ namespace Sphynx {
         try{
             TCLAP::CmdLine cmd("", ' ', "0.1", false);
             TCLAP::ValueArg<int> widthArg("w", "width", "width of window", false, 800, "int");
-            TCLAP::ValueArg<int> heightArg("g", "height", "height of window", false, 800, "int");
+            TCLAP::ValueArg<int> heightArg("h", "height", "height of window", false, 800, "int");
 
             cmd.add(widthArg);
             cmd.add(heightArg);
