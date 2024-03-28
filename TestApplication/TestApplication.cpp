@@ -5,7 +5,6 @@
 // SphynxEngine / project headers
 #include <TestApplication.h>
 #include <GeometricTools.h>
-#include "gamegrid.h"
 #include <SphynxRendering.h>
 #include <SphynxCore.h>
 #include <sphynxmath.h>
@@ -353,18 +352,12 @@ int TestApplication::run() {
         float secondaryTimerMax = 0.01;
         bool texturing = false;
         bool lighting = false;
-        bool flycamActive = false;
+        bool flyCamActive = false;
         bool camLight = false;
 
-        GameGrid<gridX, gridY> gameGrid({gridX, gridX, gridY});
         glm::vec3 lightPosition(0);
             // Calculating the average position of the active blocks to get activeLight position.
-        int activeBlocks = 0;
-        for(auto & activePosition : gameGrid.getActivePositions()) {
-            lightPosition += activePosition;
-            activeBlocks++;
-        }
-        lightPosition /= activeBlocks;
+
         lightsManager[activeLight].position = lightPosition;
 
         RenderCommands::enableDepthTest();
@@ -393,31 +386,11 @@ int TestApplication::run() {
              */
 
             // Handling forward movement / dropping
-            movementTimer -= dt;
-            if( movementTimer < 0 && !dropping) {
-                gameGrid.moveForward();
-                movementTimer = timerMax;
-            } else if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::X) && !dropping) {
-                gameGrid.moveForward();
-                movementTimer = timerMax;
-                secondaryTimer = secondaryTimerMax;
-            } else if (Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::J) && !dropping) {
-                dropping = true;
-            }
-            if(dropping) {
-                secondaryTimer -= dt;
-                if(secondaryTimer < 0) {
-                    movementTimer = timerMax;
-                    secondaryTimer = secondaryTimerMax;
-                    if(!gameGrid.moveForward()) {
-                        dropping = false;
-                    }
-                }
-            }
+
 
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::C)) {
-                flycamActive = !flycamActive;
-                if(flycamActive) {
+                flyCamActive = !flyCamActive;
+                if(flyCamActive) {
                     mouse.captureMouse();
                     mouse.resetDelta();
                 } else {
@@ -442,7 +415,7 @@ int TestApplication::run() {
 
 
 
-            if( !flycamActive ) {
+            if( !flyCamActive ) {
                 if(Sphynx::Keyboard::isKeyActive(left )) {
                     rotation += rotationRate * dt;
                 }
@@ -511,19 +484,6 @@ int TestApplication::run() {
             }
 
 
-            // Handling directional movement
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Left)){
-                gameGrid.move(Direction::RIGHT);
-            }
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Right)){
-                gameGrid.move(Direction::LEFT);
-            }
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Up)){
-                gameGrid.move(Direction::UP);
-            }
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Down)){
-                gameGrid.move(Direction::DOWN);
-            }
 
             // Toggles texturing
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::T)) {
@@ -536,6 +496,11 @@ int TestApplication::run() {
                 generalShader.uploadUniformInt("u_lighting", !lighting);
                 lighting = !lighting;
             }
+
+            sphynx::guiDemoButtonLambdas([&](){
+                generalShader.uploadUniformInt("u_lighting", !lighting);
+                lighting = !lighting;
+            });
 
             /************************************************************************************
             // Lighting updates/movement
@@ -581,25 +546,10 @@ int TestApplication::run() {
                 borderShader.use();
                 borderShader.uploadUniformVec3("u_borderColor", {0.0, 0.0, 0.0});
                 modelManager[box].vao->setIndexBuffer(boxLinesEBO);
-                for(int i = 0; i < gridY; i++) {
-                    for(auto & stoppedPosition : gameGrid.stoppedPositions[i]) {
-                        modelManager[box].setPosition(stoppedPosition);
-                        borderShader.uploadUniformMat4("u_modelMatrix", modelManager[box].getMatrix());
-                        RenderCommands::drawIndex(modelManager[box].vao, GL_LINES);
-                    }
-                }
                 modelManager[box].vao->setIndexBuffer(boxTrianglesEBO);
                 generalShader.use();
             }
-            // Drawing of faces
-            for(int i = 0; i < gridY; i++) {
-                for(auto & stoppedPosition : gameGrid.stoppedPositions[i]) {
-                    modelManager[box].materials[0].diffuseColor = colors[i];
-                    modelManager[box].setPosition(stoppedPosition);
-                    modelManager[box].upload(generalShader);
-                    RenderCommands::drawIndex(modelManager[box].vao, GL_TRIANGLES);
-                }
-            }
+
 
 
             /************************************************************************************
@@ -610,28 +560,15 @@ int TestApplication::run() {
             borderShader.use();
             borderShader.uploadUniformVec3("u_borderColor", {0.5, 0.5, 0.5});
             modelManager[box].vao->setIndexBuffer(boxLinesEBO);
-            for(auto & activePosition : gameGrid.getActivePositions()) {
-                modelManager[box].setPosition(activePosition);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[box].getMatrix());
-                RenderCommands::drawIndex(modelManager[box].vao, GL_LINES);
-            }
             modelManager[box].vao->setIndexBuffer(boxTrianglesEBO);
 
             // Drawing of faces
             generalShader.use();
             generalShader.uploadUniformFloat("u_opaqueness", 0.5f);
             RenderCommands::enableAlphaMode();
-            activeBlocks = 0;
             lightPosition = {};
             modelManager[box].materials[0].diffuseColor = {0.7, 1.0, 1.0};
-            for(auto & activePosition : gameGrid.getActivePositions()) {
-                lightPosition += activePosition;
-                activeBlocks++;
-                modelManager[box].setPosition(activePosition);
-                modelManager[box].upload(generalShader);
-                RenderCommands::drawIndex(modelManager[box].vao, GL_TRIANGLES);
-            }
-            lightPosition /= activeBlocks;
+
             RenderCommands::disableAlphaMode();
             generalShader.uploadUniformFloat("u_opaqueness", 1.0f);
 
