@@ -37,6 +37,12 @@ namespace sphynx {
             show_another_window = false;
         ImGui::End();
     }
+
+    void guiCleanup() {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+    }
 }
 
 

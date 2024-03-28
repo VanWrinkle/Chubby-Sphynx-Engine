@@ -16,6 +16,8 @@ namespace sphynx {
     void guiRender();
 
     void guiDemo(bool show_another_window);
+
+    void guiCleanup();
 }
 
 #endif //CHUBBYSPHYNXENGINE_GUI_CORE_H

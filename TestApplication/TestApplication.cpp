@@ -353,7 +353,7 @@ int TestApplication::run() {
         float secondaryTimerMax = 0.01;
         bool texturing = false;
         bool lighting = false;
-        bool flyCam = false;
+        bool flycamActive = false;
         bool camLight = false;
 
         GameGrid<gridX, gridY> gameGrid({gridX, gridX, gridY});
@@ -416,8 +416,8 @@ int TestApplication::run() {
             }
 
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::C)) {
-                flyCam = !flyCam;
-                if(flyCam) {
+                flycamActive = !flycamActive;
+                if(flycamActive) {
                     mouse.captureMouse();
                     mouse.resetDelta();
                 } else {
@@ -442,7 +442,7 @@ int TestApplication::run() {
 
 
 
-            if( !flyCam ) {
+            if( !flycamActive ) {
                 if(Sphynx::Keyboard::isKeyActive(left )) {
                     rotation += rotationRate * dt;
                 }
@@ -635,6 +635,8 @@ int TestApplication::run() {
             RenderCommands::disableAlphaMode();
             generalShader.uploadUniformFloat("u_opaqueness", 1.0f);
 
+            sphynx::guiRender();
+
             // Reset for new frame
             glfwSwapBuffers(m_window);
             RenderCommands::clear();
@@ -647,9 +649,9 @@ int TestApplication::run() {
             gizmoMatrix.setScale(glm::vec3(3.0f));
             AxisIndicator::Draw(gizmoMatrix, camera);
 
-            sphynx::guiRender();
         }
     }
+    sphynx::guiCleanup();
     glfwTerminate(); //TODO: Some memory leak apparently associated with x11. Check for bug free version if time permits.
     return EXIT_SUCCESS;
 }
