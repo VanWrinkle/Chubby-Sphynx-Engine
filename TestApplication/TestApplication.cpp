@@ -589,6 +589,6 @@ int TestApplication::run() {
         }
     }
     sphynx::guiCleanup();
-    glfwTerminate(); //TODO: Some memory leak apparently associated with x11. Check for bug free version if time permits.
+    glfwTerminate();
     return EXIT_SUCCESS;
 }
