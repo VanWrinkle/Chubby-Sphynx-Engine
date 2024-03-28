@@ -6,7 +6,7 @@
 #define CHUBBYSPHYNXENGINE_SPHYNXMATH_H
 
 #include <glm/glm.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
+
 
 namespace sem {
     using namespace glm;
