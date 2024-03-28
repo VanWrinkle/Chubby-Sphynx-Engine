@@ -9,6 +9,7 @@
 #include <SphynxRendering.h>
 #include <SphynxCore.h>
 #include <sphynxmath.h>
+#include <gui_core.h>
 
 // STD
 #include <memory>
@@ -135,8 +136,7 @@ const std::vector<glm::vec3> colors {
  * @param version
  */
 TestApplication::TestApplication(const std::string& name, const std::string& version)
-    : Sphynx::Application(name, version)
-{ };
+    : Sphynx::Application(name, version){}
 
 /**
  * MAIN PROGRAM
@@ -146,7 +146,8 @@ int TestApplication::run() {
         /**
          * SETTING UP KEYBINDS AND BEHAVIOUR
          */
-
+        const auto guiOpenGLVersion = std::string("#version 130");
+        sphynx::guiCreateContext(m_window, guiOpenGLVersion);
 
 
         Sphynx::Keyboard::setKeyBehaviour(Sphynx::Key::Space, Sphynx::KeyMode::CONTINUOUS);
@@ -375,6 +376,11 @@ int TestApplication::run() {
         ************************************************************************************/
 
         while(!glfwWindowShouldClose(m_window)) {
+
+            sphynx::guiLoopStart();
+
+            sphynx::guiDemo(true);
+
             generalShader.use();
             // Updating time
             previousFrame = currentFrame;
@@ -640,6 +646,8 @@ int TestApplication::run() {
             ModelMatrix gizmoMatrix = ModelMatrix();
             gizmoMatrix.setScale(glm::vec3(3.0f));
             AxisIndicator::Draw(gizmoMatrix, camera);
+
+            sphynx::guiRender();
         }
     }
     glfwTerminate(); //TODO: Some memory leak apparently associated with x11. Check for bug free version if time permits.
