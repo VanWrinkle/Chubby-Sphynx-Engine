@@ -28,7 +28,7 @@ jobs:
       run: sudo apt-get update
 
     - name: Install packages
-      run: sudo apt-get install --fix-missing libgl1-mesa-dev wayland-scanner++
+      run: sudo apt-get install --fix-missing libgl1-mesa-dev wayland-scanner wayland-scanner++
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
