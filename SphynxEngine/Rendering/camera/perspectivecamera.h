@@ -4,9 +4,8 @@
 #include "camera/camera.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include <array>
+#include <cmath>
 
-const float RAD_TO_DEGREES = 180.0f / M_PI;
-const float DEG_TO_RADIANS = M_PI / 180.f;
 
 class PerspectiveCamera : public Camera
 {
@@ -20,10 +19,12 @@ public:
     };
 
 public:
-    PerspectiveCamera(const Frustum &frustum = {45.0f, -1.0f, 1.0f, 1.0f, -1.0f},
-                      const glm::vec3 &position = glm::vec3(5.0f),
-                      const glm::vec3 &lookAt = glm::vec3(0.0f),
-                      const glm::vec3 &upVector = glm::vec3(0.0f, 1.0f, 0.0f)) {
+    PerspectiveCamera(
+            const Frustum &frustum = {45.0f, -1.0f, 1.0f, 1.0f, -1.0f},
+            const glm::vec3 &position = glm::vec3(5.0f),
+            const glm::vec3 &lookAt = glm::vec3(0.0f),
+            const glm::vec3 &upVector = glm::vec3(0.0f, 1.0f, 0.0f)
+    ) {
         m_cameraFrustum = frustum;
         m_position = position;
         m_magnitude = glm::length( lookAt - position);
@@ -64,7 +65,17 @@ public:
         this->recalculateMatrix();
     }
 
+    [[nodiscard]] glm::vec3 getFront() const {
+        return m_front;
+    }
 
+    [[nodiscard]] glm::vec3 getUp() const {
+        return m_cameraUp;
+    }
+
+    [[nodiscard]] glm::vec3 getRight() const {
+        return m_cameraRight;
+    }
 
     void setPosition(const glm::vec3& pos) override {
         glm::vec3 direction = m_magnitude * m_front + m_position - pos;
@@ -133,13 +144,13 @@ protected:
 
 protected:
     float m_magnitude;
-    glm::vec3 m_upVector;
-    glm::vec3 m_cameraUp;
-    glm::vec3 m_cameraRight;
-    glm::vec3 m_front;
+    glm::vec3 m_upVector{};
+    glm::vec3 m_cameraUp{};
+    glm::vec3 m_cameraRight{};
+    glm::vec3 m_front{};
     float m_yaw             {-90.0f};
     float m_pitch           {};
-    Frustum m_cameraFrustum;
+    Frustum m_cameraFrustum{};
 };
 
 #endif // PERSPECTIVECAMERA_H_

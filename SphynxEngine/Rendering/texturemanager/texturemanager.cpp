@@ -4,7 +4,7 @@
 #include <iostream>
 
 
-bool TextureManager::LoadModelTextures( Model &model , const std::string &filePath) {
+void TextureManager::LoadModelTextures( Model &model , const std::string &filePath) {
     for(auto & material : model.materials) {
         if(!material.diffuseTexture.empty()) {
             auto it = m_textures.find(material.diffuseTexture);
@@ -53,6 +53,7 @@ GLuint TextureManager::findTextureUnit(){
             return m_unitIndex;
         }
     }
+    return 0;
 };
 
 bool TextureManager::LoadTexture2DRGBA(const std::string& name, const std::string& filePath, bool mipMap)

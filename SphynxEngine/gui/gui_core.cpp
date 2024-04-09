@@ -6,6 +6,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <string>
+#include <functional>
 
 namespace sphynx {
     void guiCreateContext(GLFWwindow* window, const std::string& glslVersion) {
@@ -45,6 +46,32 @@ namespace sphynx {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+    }
+
+    void guiDemoButtonLambdas( const std::function<void()>& onPress ) {
+        ImGui::Begin("Function call");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Text("Hello from function call window!");
+        ImGui::BeginGroup();
+        {
+            ImGui::PushItemWidth(5);
+            if (ImGui::Button("Call 1"))
+                onPress();
+            if (ImGui::Button("Call 2"))
+                onPress();
+            ImGui::PopItemWidth();
+        }
+        ImGui::EndGroup();
+        ImGui::SameLine();
+        static bool wireframeRendering = false;
+        if (ImGui::Checkbox("Another name", &wireframeRendering)) {
+            if(wireframeRendering) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            } else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+        }
+
+        ImGui::End();
     }
 }
 

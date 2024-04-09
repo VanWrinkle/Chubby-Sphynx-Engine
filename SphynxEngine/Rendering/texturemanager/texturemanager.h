@@ -49,7 +49,7 @@ public:
 public:
     bool LoadTexture2DRGBA(const std::string& name, const std::string& filepath, bool mipMap=true);
     bool LoadCubeMapRGBA(const std::string& name, const std::string& filePath, bool mipMap=true);
-    bool LoadModelTextures( Model &model , const std::string &filePath);
+    void LoadModelTextures( Model &model , const std::string &filePath);
     GLuint GetUnitByName(const std::string& name) const;
 
 private:

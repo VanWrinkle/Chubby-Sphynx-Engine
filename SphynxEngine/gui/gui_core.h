@@ -6,6 +6,7 @@
 #define CHUBBYSPHYNXENGINE_GUI_CORE_H
 
 #include <string>
+#include <functional>
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
@@ -19,6 +20,8 @@ namespace sphynx {
     void guiDemo(bool show_another_window);
 
     void guiCleanup();
+
+    void guiDemoButtonLambdas( const std::function<void()>& onPress );
 }
 
 #endif //CHUBBYSPHYNXENGINE_GUI_CORE_H

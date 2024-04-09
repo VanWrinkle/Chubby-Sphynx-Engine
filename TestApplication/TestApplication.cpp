@@ -145,6 +145,9 @@ int TestApplication::run() {
         /**
          * SETTING UP KEYBINDS AND BEHAVIOUR
          */
+        Sphynx::Mouse* mouse = Sphynx::Mouse::getInstance();
+        mouse->registerCallbacks(m_window);
+
         const auto guiOpenGLVersion = std::string("#version 130");
         sphynx::guiCreateContext(m_window, guiOpenGLVersion);
 
@@ -155,14 +158,9 @@ int TestApplication::run() {
         Sphynx::KeyCode right = Sphynx::KeyCode::D;
         Sphynx::KeyCode zoomIn = Sphynx::KeyCode::W;
         Sphynx::KeyCode zoomOut = Sphynx::KeyCode::S;
-        Sphynx::KeyCode up = Sphynx::KeyCode::C;
-        Sphynx::KeyCode forwards = Sphynx::KeyCode::X;
         Sphynx::KeyCode forwardsFast = Sphynx::KeyCode::Space;
         Sphynx::KeyCode down = Sphynx::KeyCode::LeftShift;
-        Sphynx::KeyCode exit = Sphynx::KeyCode::Escape;
-        Sphynx::KeyCode wireframeToggle = Sphynx::KeyCode::T;
 
-        Sphynx::Mouse mouse(m_window);
 
         Sphynx::Keyboard::setKeyBehaviour(forwardsFast, Sphynx::KeyMode::CONTINUOUS);
         Sphynx::Keyboard::setKeyBehaviour(down, Sphynx::KeyMode::CONTINUOUS);
@@ -188,18 +186,12 @@ int TestApplication::run() {
         glfwGetWindowSize(m_window, &windowWidth, &windowHeight);
 
         PerspectiveCamera::Frustum frustum{};
-        frustum.angle = 70.0f;
+        const float cameraFOV = 70.0f;
+        frustum.angle = cameraFOV;
         frustum.far = 100.0f;
         frustum.near = 0.01f;
         frustum.height = windowHeight;
         frustum.width = windowWidth;
-        float cameraDistance = 70.0f;
-        float cameraHeight = 20.0f;
-        float maxDistance = 85.0f;
-        float minDistance = 2.0f;
-        float zoomRate = 30.0f;
-        float rotation = 0.0f;
-        float rotationRate = 2.0f;
 
 
         sem::vec3 cameraPosition(0.0f, 0.0f, -5);
@@ -345,14 +337,8 @@ int TestApplication::run() {
         float dt = 0;
         float currentFrame = 0;
         float previousFrame = 0;
-        bool dropping = false;
-        float timerMax = 1.3f;
-        float movementTimer = 1.5f;
-        float secondaryTimer = 0.0;
-        float secondaryTimerMax = 0.01;
         bool texturing = false;
         bool lighting = false;
-        bool flyCamActive = false;
         bool camLight = false;
 
         glm::vec3 lightPosition(0);
@@ -379,7 +365,29 @@ int TestApplication::run() {
             previousFrame = currentFrame;
             currentFrame = glfwGetTime();
             dt = currentFrame - previousFrame;
-            mouse.update(dt);
+
+
+            int height;
+            int width;
+            glfwGetWindowSize(m_window, &width, &height);
+            glm::vec2 mousePos = Sphynx::Mouse::getCursorPosition();
+            float mouseWindowHeightFraction = mousePos.y / height;
+            float mouseWindowWidthFraction =  mousePos.x / width;
+
+            const float fov_x = tan(cameraFOV/2) * width / height;
+
+            const auto leftMostVector = camera.getFront() - camera.getRight() * fov_x ;
+            const auto rightMostVector =  camera.getFront() + camera.getRight() * fov_x ;
+
+            glm::vec3 fractionVector = glm::mix(leftMostVector, rightMostVector, mouseWindowWidthFraction);
+            fractionVector = glm::normalize(fractionVector);
+            fractionVector *= 10;
+
+
+
+
+
+
 
             /**
              * CONTROLLER INPUT/UPDATES
@@ -388,24 +396,13 @@ int TestApplication::run() {
             // Handling forward movement / dropping
 
 
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::C)) {
-                flyCamActive = !flyCamActive;
-                if(flyCamActive) {
-                    mouse.captureMouse();
-                    mouse.resetDelta();
-                } else {
-                    camera.SetLookAt({0.0f, 0.0f, 0.0f});
-                    mouse.releaseMouse();
-                }
-            }
-
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::K)) {
                 camLight = !camLight;
                 if(camLight) {
                     lightsManager["cameraLight"].isActive = true;
                 } else {
                     lightsManager["cameraLight"].isActive = false;
-                    lightsManager.upload(generalShader, "cameraLight",0);
+                    lightsManager.upload(generalShader, "cameraLight", 0);
                 }
             }
             if(camLight) {
@@ -415,74 +412,51 @@ int TestApplication::run() {
 
 
 
-            if( !flyCamActive ) {
-                if(Sphynx::Keyboard::isKeyActive(left )) {
-                    rotation += rotationRate * dt;
-                }
-                if(Sphynx::Keyboard::isKeyActive(right )) {
-                    rotation -= rotationRate * dt;
-                }
-                if(Sphynx::Keyboard::isKeyActive(zoomIn )) {
-                    cameraDistance = std::max(minDistance, cameraDistance - zoomRate * dt);
-                }
-                if(Sphynx::Keyboard::isKeyActive(zoomOut )) {
-                    cameraDistance = std::min(maxDistance, cameraDistance + zoomRate * dt);
-                }
-                if(Sphynx::Keyboard::isKeyActive(down )) {
-                    cameraHeight -= zoomRate * dt;
-                }
-                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Space )) {
-                    cameraHeight += zoomRate * dt;
-                }
-
-                cameraPosition.x = cosf(rotation)*cameraDistance;
-                cameraPosition.y = cameraHeight;
-                cameraPosition.z = sinf(rotation)*cameraDistance;
-                camera.setPosition(cameraPosition);
-
-                generalShader.uploadUniformVec3("u_viewPos", camera.getPosition());
-                generalShader.uploadUniformMat4("u_view", camera.getViewMatrix());
-                generalShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
-
-                borderShader.use();
-                borderShader.uploadUniformMat4("u_view", camera.getViewMatrix());
-                borderShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
-                generalShader.use();
-            } else {
-                camera.mouseInput(mouse.getMouseDelta()*0.05f);
-                glm::vec3 direction {};
-                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::A)) {
-                    direction +=  glm::vec3(-1.0f, 0.0f, 0.0f);
-                }
-                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::D)) {
-                    direction +=  glm::vec3(1.0f, 0.0f, 0.0f);
-                }
-                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::W)) {
-                    direction +=  glm::vec3(0.0f, 0.0f, 1.0f);
-                }
-                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::S)) {
-                    direction +=  glm::vec3(0.0f, 0.0f, -1.0f);
-                }
+            if(mouse->isButtonDown(Sphynx::MouseCode::ButtonMiddle)) {
                 if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::LeftShift)) {
-                    direction +=  glm::vec3(0.0f, -1.0f, 0.0f);
+                    const auto mouseDelta = mouse->getMouseDelta();
+                    camera.move({-mouseDelta.x, mouseDelta.y, 0}, 0.025f);
+
+                } else {
+                    camera.mouseInput(mouse->getMouseDelta()*0.075f);
                 }
-                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Space)) {
-                    direction +=  glm::vec3(0.0f, 1.0f, 0.0f);
-                }
+
+            } else {
+                glm::vec3 direction {};
+//                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::A)) {
+//                    direction +=  glm::vec3(-1.0f, 0.0f, 0.0f);
+//                }
+//                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::D)) {
+//                    direction +=  glm::vec3(1.0f, 0.0f, 0.0f);
+//                }
+//                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::W)) {
+//                    direction +=  glm::vec3(0.0f, 0.0f, 1.0f);
+//                }
+//                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::S)) {
+//                    direction +=  glm::vec3(0.0f, 0.0f, -1.0f);
+                direction.z += mouse->getScroll() * 20;
+//                }
+//                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::LeftShift)) {
+//                    direction +=  glm::vec3(0.0f, -1.0f, 0.0f);
+//                }
+//                if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Space)) {
+//                    direction +=  glm::vec3(0.0f, 1.0f, 0.0f);
+//                }
                 if(direction.x || direction.y || direction.z) {
                     camera.move(direction, dt*10.f);
                 }
-
-                generalShader.uploadUniformVec3("u_viewPos", camera.getPosition());
-                generalShader.uploadUniformMat4("u_view", camera.getViewMatrix());
-                generalShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
-
-                borderShader.use();
-                borderShader.uploadUniformMat4("u_view", camera.getViewMatrix());
-                borderShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
-                generalShader.use();
             }
 
+
+
+            generalShader.uploadUniformVec3("u_viewPos", camera.getPosition());
+            generalShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+            generalShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
+
+            borderShader.use();
+            borderShader.uploadUniformMat4("u_view", camera.getViewMatrix());
+            borderShader.uploadUniformMat4("u_projection", camera.getProjectionMatrix());
+            generalShader.use();
 
 
             // Toggles texturing
@@ -530,8 +504,13 @@ int TestApplication::run() {
             RenderCommands::drawIndex(modelManager[floor].vao, GL_TRIANGLES);
             modelManager[endWall].upload(generalShader);
             RenderCommands::drawIndex(modelManager[endWall].vao, GL_TRIANGLES);
+
+            modelManager["pickaxe"].setPosition(camera.getPosition() + fractionVector);
             modelManager["pickaxe"].upload(generalShader);
             RenderCommands::drawIndex(modelManager["pickaxe"].vao, GL_TRIANGLES);
+
+
+
             modelManager["Cube"].upload(generalShader);
             RenderCommands::drawIndex(modelManager["Cube"].vao, GL_TRIANGLES);
 
@@ -577,6 +556,7 @@ int TestApplication::run() {
             // Reset for new frame
             glfwSwapBuffers(m_window);
             RenderCommands::clear();
+            mouse->update(dt);
             glfwPollEvents();
 
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Escape )) {
