@@ -12,16 +12,14 @@
 #include <tuple>
 
 static const Sphynx::MouseCode buttonCodes[] = {
-    Sphynx::MouseCode::Button0,
-    Sphynx::MouseCode::Button1,
+    Sphynx::MouseCode::ButtonLeft,
+    Sphynx::MouseCode::ButtonRight,
+    Sphynx::MouseCode::ButtonMiddle,
     Sphynx::MouseCode::Button3,
     Sphynx::MouseCode::Button4,
     Sphynx::MouseCode::Button5,
     Sphynx::MouseCode::Button6,
     Sphynx::MouseCode::Button7,
-    Sphynx::MouseCode::ButtonLeft,
-    Sphynx::MouseCode::ButtonRight,
-    Sphynx::MouseCode::ButtonMiddle
     };
 
 namespace Sphynx {
@@ -37,56 +35,113 @@ namespace Sphynx {
 
 
     private:
-        double m_prevX {};
-        double m_prevY {};
-        double m_posX  {};
-        double m_posY  {};
-        GLFWwindow *m_window;
-        bool  m_smoothing {false};
-        float m_factor {};
-        float m_minStep{};
-        std::vector<MouseButtonState> m_buttonStates {};
+        inline static Mouse* m_instance = nullptr;
+        inline static double m_prevX {};
+        inline static double m_prevY {};
+        inline static double m_posX {};
+        inline static double m_posY {};
+        inline static double m_scroll {};
+        GLFWwindow* m_window = nullptr;
+        inline static std::vector<MouseButtonState> m_buttonStates {};
 
 
+
+
+        static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+            if(m_buttonStates.empty()) {
+                for(auto _ : buttonCodes) {
+                    m_buttonStates.push_back(MouseButtonState::Released);
+                }
+            }
+            try {
+                const auto currentMouseState = m_buttonStates.at(button);
+                if(action == GLFW_PRESS) {
+                    if(currentMouseState == MouseButtonState::Released || currentMouseState == MouseButtonState::JustReleased) {
+                        m_buttonStates[button] = MouseButtonState::JustPressed;
+                    } else {
+                        m_buttonStates[button] = MouseButtonState::Pressed;
+                    }
+                } else {
+                    if(currentMouseState == MouseButtonState::Pressed || currentMouseState == MouseButtonState::JustPressed) {
+                        m_buttonStates[button] = MouseButtonState::JustReleased;
+                    } else {
+                        m_buttonStates[button] = MouseButtonState::Released;
+                    }
+                }
+            }
+            catch (...) {
+
+            }
+
+        }
+
+        static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+            m_posX = xpos;
+            m_posY = ypos;
+        }
+
+        static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+            m_scroll += yoffset;
+        }
 
     public:
-        explicit Mouse(GLFWwindow* window) : m_window(window){
-            for(auto code : buttonCodes) {
+        explicit Mouse() {
+            for(auto _ : buttonCodes) {
                 m_buttonStates.push_back(MouseButtonState::Released);
             }
         }
 
-        void update(const float dt = 0.0f) {
-            m_prevX = m_posX;
-            m_prevY = m_posY;
-            glfwGetCursorPos(m_window, &m_posX, &m_posY);
-
-            if( m_smoothing ) {
-                float factor = std::max( m_factor*dt, m_minStep);
-                m_posX = m_prevX * (1.0 - factor) + m_posX * factor;
-                m_posY = m_prevY * (1.0 - factor) + m_posY * factor;
-            }
-
-            for(auto code : buttonCodes) {
-                const int glfwState = glfwGetMouseButton(m_window, (int)code);
-                const auto currentMouseState = m_buttonStates[(int)code];
-                if(glfwState == GLFW_PRESS) {
-                    if(currentMouseState == MouseButtonState::Released || currentMouseState == MouseButtonState::JustReleased) {
-                        m_buttonStates[(int)code] = MouseButtonState::JustPressed;
-                    } else {
-                        m_buttonStates[(int)code] = MouseButtonState::Pressed;
-                    }
-                } else {
-                    if(currentMouseState == MouseButtonState::Pressed || currentMouseState == MouseButtonState::JustPressed) {
-                        m_buttonStates[(int)code] = MouseButtonState::JustReleased;
-                    } else {
-                        m_buttonStates[(int)code] = MouseButtonState::Released;
-                    }
-                }
-            }
+        void registerCallbacks(GLFWwindow* window) {
+            m_window = window;
+            glfwSetScrollCallback(window, Mouse::scrollCallback);
+            glfwSetMouseButtonCallback(window, Mouse::mouseButtonCallback);
+            glfwSetCursorPosCallback(window, Mouse::cursorPosCallback);
         }
 
-        bool isButtonDown(Sphynx::MouseButton button) {
+        static Mouse* getInstance() {
+            if(m_instance == nullptr) {
+                m_instance = new Mouse();
+            }
+            return m_instance;
+        }
+
+
+
+        static void update(const float dt = 0.0f) {
+//
+            m_prevY = m_posY;
+            m_prevX = m_posX;
+//            m_posX = 0;
+//            m_posY = 0;
+            m_scroll = 0;
+//            glfwGetCursorPos(m_window, &m_posX, &m_posY);
+//
+//            if( m_smoothing ) {
+//                float factor = std::max( m_factor*dt, m_minStep);
+//                m_posX = m_prevX * (1.0 - factor) + m_posX * factor;
+//                m_posY = m_prevY * (1.0 - factor) + m_posY * factor;
+//            }
+
+//            for(auto code : buttonCodes) {
+//                const int glfwState = glfwGetMouseButton(m_window, (int)code);
+//                const auto currentMouseState = m_buttonStates[(int)code];
+//                if(glfwState == GLFW_PRESS) {
+//                    if(currentMouseState == MouseButtonState::Released || currentMouseState == MouseButtonState::JustReleased) {
+//                        m_buttonStates[(int)code] = MouseButtonState::JustPressed;
+//                    } else {
+//                        m_buttonStates[(int)code] = MouseButtonState::Pressed;
+//                    }
+//                } else {
+//                    if(currentMouseState == MouseButtonState::Pressed || currentMouseState == MouseButtonState::JustPressed) {
+//                        m_buttonStates[(int)code] = MouseButtonState::JustReleased;
+//                    } else {
+//                        m_buttonStates[(int)code] = MouseButtonState::Released;
+//                    }
+//                }
+//            }
+        }
+
+        static bool isButtonDown(Sphynx::MouseButton button) {
             try {
                 const auto state =  m_buttonStates.at((int)button);
                 return state == MouseButtonState::Pressed || state == MouseButtonState::JustPressed;
@@ -96,7 +151,7 @@ namespace Sphynx {
             }
         }
 
-        bool isButtonUp(Sphynx::MouseButton button) {
+        static bool isButtonUp(Sphynx::MouseButton button) {
             try {
                 const auto state =  m_buttonStates.at((int)button);
                 return state == MouseButtonState::Released || state == MouseButtonState::JustReleased;
@@ -106,7 +161,7 @@ namespace Sphynx {
             }
         }
 
-        bool isButtonPressed(Sphynx::MouseButton button){
+        static bool isButtonPressed(Sphynx::MouseButton button){
             try {
                 const auto state =  m_buttonStates.at((int)button);
                 return state == MouseButtonState::JustPressed;
@@ -116,7 +171,7 @@ namespace Sphynx {
             }
         }
 
-        bool isButtonReleased(Sphynx::MouseButton button){
+        static bool isButtonReleased(Sphynx::MouseButton button){
             try {
                 const auto state =  m_buttonStates.at((int)button);
                 return state == MouseButtonState::JustReleased;
@@ -126,34 +181,25 @@ namespace Sphynx {
             }
         }
 
-        void resetDelta() {
-            glfwGetCursorPos(m_window, &m_posX, &m_posY);
-            m_prevX = m_posX;
-            m_prevY = m_posY;
-        }
-
-        void enableSmoothing(float factor = 1.0f, const float &minStep = 0.0f) {
-            m_factor = factor;// std::min(std::max(factor, 0.0f), 1.0f);
-            m_smoothing = true;
-        }
-
-        void disableSmoothing() {
-            m_smoothing = false;
-        }
-
-        void setSmoothing(const float &factor) {
-            m_factor = std::min(std::max(factor, 0.0f), 1.0f);
-        }
-
-        [[nodiscard]] glm::vec2 getMouseDelta() const {
+        [[nodiscard]] static glm::vec2 getMouseDelta() {
             return {m_posX - m_prevX, m_posY - m_prevY};
         }
 
         void captureMouse() {
+            if(m_window == nullptr) return;
             glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
 
+        static glm::vec2 getCursorPosition() {
+            return {m_posX, m_posY};
+        }
+
+        static double getScroll() {
+            return m_scroll;
+        }
+
         void releaseMouse() {
+            if(m_window == nullptr) return;
             glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
     };
