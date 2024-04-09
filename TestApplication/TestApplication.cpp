@@ -5,10 +5,10 @@
 // SphynxEngine / project headers
 #include <TestApplication.h>
 #include <GeometricTools.h>
-#include "gamegrid.h"
 #include <SphynxRendering.h>
 #include <SphynxCore.h>
 #include <sphynxmath.h>
+#include <gui_core.h>
 
 // STD
 #include <memory>
@@ -135,8 +135,7 @@ const std::vector<glm::vec3> colors {
  * @param version
  */
 TestApplication::TestApplication(const std::string& name, const std::string& version)
-    : Sphynx::Application(name, version)
-{ };
+    : Sphynx::Application(name, version){}
 
 /**
  * MAIN PROGRAM
@@ -146,7 +145,8 @@ int TestApplication::run() {
         /**
          * SETTING UP KEYBINDS AND BEHAVIOUR
          */
-
+        const auto guiOpenGLVersion = std::string("#version 130");
+        sphynx::guiCreateContext(m_window, guiOpenGLVersion);
 
 
         Sphynx::Keyboard::setKeyBehaviour(Sphynx::Key::Space, Sphynx::KeyMode::CONTINUOUS);
@@ -352,18 +352,12 @@ int TestApplication::run() {
         float secondaryTimerMax = 0.01;
         bool texturing = false;
         bool lighting = false;
-        bool flyCam = false;
+        bool flyCamActive = false;
         bool camLight = false;
 
-        GameGrid<gridX, gridY> gameGrid({gridX, gridX, gridY});
         glm::vec3 lightPosition(0);
             // Calculating the average position of the active blocks to get activeLight position.
-        int activeBlocks = 0;
-        for(auto & activePosition : gameGrid.getActivePositions()) {
-            lightPosition += activePosition;
-            activeBlocks++;
-        }
-        lightPosition /= activeBlocks;
+
         lightsManager[activeLight].position = lightPosition;
 
         RenderCommands::enableDepthTest();
@@ -375,6 +369,11 @@ int TestApplication::run() {
         ************************************************************************************/
 
         while(!glfwWindowShouldClose(m_window)) {
+
+            sphynx::guiLoopStart();
+
+            sphynx::guiDemo(true);
+
             generalShader.use();
             // Updating time
             previousFrame = currentFrame;
@@ -387,31 +386,11 @@ int TestApplication::run() {
              */
 
             // Handling forward movement / dropping
-            movementTimer -= dt;
-            if( movementTimer < 0 && !dropping) {
-                gameGrid.moveForward();
-                movementTimer = timerMax;
-            } else if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::X) && !dropping) {
-                gameGrid.moveForward();
-                movementTimer = timerMax;
-                secondaryTimer = secondaryTimerMax;
-            } else if (Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::J) && !dropping) {
-                dropping = true;
-            }
-            if(dropping) {
-                secondaryTimer -= dt;
-                if(secondaryTimer < 0) {
-                    movementTimer = timerMax;
-                    secondaryTimer = secondaryTimerMax;
-                    if(!gameGrid.moveForward()) {
-                        dropping = false;
-                    }
-                }
-            }
+
 
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::C)) {
-                flyCam = !flyCam;
-                if(flyCam) {
+                flyCamActive = !flyCamActive;
+                if(flyCamActive) {
                     mouse.captureMouse();
                     mouse.resetDelta();
                 } else {
@@ -436,7 +415,7 @@ int TestApplication::run() {
 
 
 
-            if( !flyCam ) {
+            if( !flyCamActive ) {
                 if(Sphynx::Keyboard::isKeyActive(left )) {
                     rotation += rotationRate * dt;
                 }
@@ -505,19 +484,6 @@ int TestApplication::run() {
             }
 
 
-            // Handling directional movement
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Left)){
-                gameGrid.move(Direction::RIGHT);
-            }
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Right)){
-                gameGrid.move(Direction::LEFT);
-            }
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Up)){
-                gameGrid.move(Direction::UP);
-            }
-            if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::Down)){
-                gameGrid.move(Direction::DOWN);
-            }
 
             // Toggles texturing
             if(Sphynx::Keyboard::isKeyActive(Sphynx::KeyCode::T)) {
@@ -530,6 +496,11 @@ int TestApplication::run() {
                 generalShader.uploadUniformInt("u_lighting", !lighting);
                 lighting = !lighting;
             }
+
+            sphynx::guiDemoButtonLambdas([&](){
+                generalShader.uploadUniformInt("u_lighting", !lighting);
+                lighting = !lighting;
+            });
 
             /************************************************************************************
             // Lighting updates/movement
@@ -575,25 +546,10 @@ int TestApplication::run() {
                 borderShader.use();
                 borderShader.uploadUniformVec3("u_borderColor", {0.0, 0.0, 0.0});
                 modelManager[box].vao->setIndexBuffer(boxLinesEBO);
-                for(int i = 0; i < gridY; i++) {
-                    for(auto & stoppedPosition : gameGrid.stoppedPositions[i]) {
-                        modelManager[box].setPosition(stoppedPosition);
-                        borderShader.uploadUniformMat4("u_modelMatrix", modelManager[box].getMatrix());
-                        RenderCommands::drawIndex(modelManager[box].vao, GL_LINES);
-                    }
-                }
                 modelManager[box].vao->setIndexBuffer(boxTrianglesEBO);
                 generalShader.use();
             }
-            // Drawing of faces
-            for(int i = 0; i < gridY; i++) {
-                for(auto & stoppedPosition : gameGrid.stoppedPositions[i]) {
-                    modelManager[box].materials[0].diffuseColor = colors[i];
-                    modelManager[box].setPosition(stoppedPosition);
-                    modelManager[box].upload(generalShader);
-                    RenderCommands::drawIndex(modelManager[box].vao, GL_TRIANGLES);
-                }
-            }
+
 
 
             /************************************************************************************
@@ -604,31 +560,20 @@ int TestApplication::run() {
             borderShader.use();
             borderShader.uploadUniformVec3("u_borderColor", {0.5, 0.5, 0.5});
             modelManager[box].vao->setIndexBuffer(boxLinesEBO);
-            for(auto & activePosition : gameGrid.getActivePositions()) {
-                modelManager[box].setPosition(activePosition);
-                borderShader.uploadUniformMat4("u_modelMatrix", modelManager[box].getMatrix());
-                RenderCommands::drawIndex(modelManager[box].vao, GL_LINES);
-            }
             modelManager[box].vao->setIndexBuffer(boxTrianglesEBO);
 
             // Drawing of faces
             generalShader.use();
             generalShader.uploadUniformFloat("u_opaqueness", 0.5f);
             RenderCommands::enableAlphaMode();
-            activeBlocks = 0;
             lightPosition = {};
             modelManager[box].materials[0].diffuseColor = {0.7, 1.0, 1.0};
-            for(auto & activePosition : gameGrid.getActivePositions()) {
-                lightPosition += activePosition;
-                activeBlocks++;
-                modelManager[box].setPosition(activePosition);
-                modelManager[box].upload(generalShader);
-                RenderCommands::drawIndex(modelManager[box].vao, GL_TRIANGLES);
-            }
-            lightPosition /= activeBlocks;
+
             RenderCommands::disableAlphaMode();
             generalShader.uploadUniformFloat("u_opaqueness", 1.0f);
 
+
+            sphynx::guiRender(m_window);
             // Reset for new frame
             glfwSwapBuffers(m_window);
             RenderCommands::clear();
@@ -640,8 +585,10 @@ int TestApplication::run() {
             ModelMatrix gizmoMatrix = ModelMatrix();
             gizmoMatrix.setScale(glm::vec3(3.0f));
             AxisIndicator::Draw(gizmoMatrix, camera);
+
         }
     }
-    glfwTerminate(); //TODO: Some memory leak apparently associated with x11. Check for bug free version if time permits.
+    sphynx::guiCleanup();
+    glfwTerminate();
     return EXIT_SUCCESS;
 }

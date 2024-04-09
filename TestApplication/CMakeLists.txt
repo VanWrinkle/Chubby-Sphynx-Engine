@@ -12,6 +12,7 @@ target_link_libraries(TestApplication PUBLIC
         Engine::Rendering
         Engine::Core
         Engine::Math
+        Engine::Gui
         tinyobjloader
         )
 

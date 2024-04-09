@@ -49,9 +49,9 @@ namespace RenderCommands {
         return max;
     }
 
-    inline void setWireframeMode() {glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+    inline void enableWireframes() {glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 
-    inline void setSolidMode() {glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+    inline void disableWireframes() {glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
     inline void setClearColor( const glm::vec3 &col ) { glClearColor(col[0], col[1], col[2], 1.0f); }
 
