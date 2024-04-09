@@ -4,7 +4,6 @@ add_subdirectory(tclap)
 add_subdirectory(tinyobjloader)
 add_subdirectory(glad)
 add_subdirectory(spdlog)
-add_subdirectory(stb)
 # -------------- IMGUI static library creation`
 #
 set(IMGUI_PATH ./imgui)
@@ -31,3 +30,6 @@ add_library(ImGui STATIC ${IMGUI_GLOB})
 target_include_directories(ImGui PUBLIC ${IMGUI_PATH})
 target_link_libraries(ImGui PRIVATE glfw)
 # ----------------------------------------------------------------------
+
+add_library(stb INTERFACE ./stb/stb_image.h)
+target_include_directories(stb INTERFACE ./stb)
